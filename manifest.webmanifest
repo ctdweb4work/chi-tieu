@@ -1,0 +1,15 @@
+{
+  "name": "Chi Tiêu — Quản lý tài chính cá nhân",
+  "short_name": "Chi Tiêu",
+  "description": "Quản lý chi tiêu theo hũ, cá nhân hóa theo thu nhập. Offline, dữ liệu lưu trên máy.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f5f0",
+  "theme_color": "#0f6e56",
+  "lang": "vi",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

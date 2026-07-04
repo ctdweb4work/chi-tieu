@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f6e56">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Chi Tiêu — Quản lý tài chính cá nhân</title>
+<style>
+:root{
+  --bg:#f6f5f0; --card:#ffffff; --ink:#1c1c1a; --ink2:#6b6a64; --ink3:#a3a29a;
+  --line:#e8e6de; --accent:#0f6e56; --accent-bg:#e1f5ee;
+  --ok:#1d9e75; --warn:#ba7517; --warn-bg:#faeeda; --bad:#e24b4a; --bad-bg:#fcebeb;
+  --r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.screen{flex:1;padding:20px 18px 96px;overflow-y:auto}
+h1{font-size:20px;font-weight:600}
+h2{font-size:15px;font-weight:600;color:var(--ink2);margin:22px 0 10px}
+.muted{color:var(--ink2);font-size:13px}
+.tiny{color:var(--ink3);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1}
+button{font:inherit;border:none;background:none;cursor:pointer;color:inherit}
+.btn{display:block;width:100%;padding:15px;border-radius:var(--r);background:var(--accent);color:#fff;font-size:16px;font-weight:600;text-align:center}
+.btn:disabled{opacity:.4}
+.btn-ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+input[type=text],input[type=tel],input[type=number]{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+/* header */
+.hero{text-align:center;padding:26px 0 20px}
+.hero .lbl{font-size:13px;color:var(--ink2)}
+.hero .amt{font-size:38px;font-weight:700;letter-spacing:-.5px;margin:4px 0 2px}
+.hero .amt.over{color:var(--bad)}
+/* stat cards */
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat .v{font-size:18px;font-weight:600;margin-top:2px}
+/* jars */
+.jar{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:10px}
+.jar .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px}
+.jar .nm{font-weight:500}
+.bar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px}
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink3);padding:4px 10px;min-width:56px}
+.nav button.on{color:var(--accent);font-weight:600}
+.nav .ic{font-size:21px;line-height:1}
+.nav .fab{width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;margin-top:-24px;box-shadow:0 4px 12px rgba(15,110,86,.35)}
+/* numpad */
+.amtbox{text-align:center;padding:30px 0 18px}
+.amtbox .a{font-size:40px;font-weight:700;min-height:52px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.pad button{background:var(--card);border:1px solid var(--line);border-radius:var(--r);font-size:24px;font-weight:500;padding:16px 0}
+.pad button:active{background:var(--accent-bg)}
+/* jar picker */
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pick button{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:13px 12px;text-align:left}
+.pick button.sel{border-color:var(--accent);background:var(--accent-bg)}
+.pick .ico{font-size:22px}
+.pick .n{font-weight:600;font-size:14px;margin-top:5px}
+.pick .r{font-size:12px;color:var(--ink2);margin-top:2px}
+/* history */
+.day{margin-bottom:16px}
+.day .dh{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-bottom:6px;padding:0 2px}
+.tx{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px;margin-bottom:7px}
+.tx .ico{font-size:20px}
+.tx .n{font-size:14px;font-weight:500}
+.tx .s{font-size:12px;color:var(--ink3)}
+.tx .a{font-weight:600;font-size:14px;white-space:nowrap}
+.tx .del{color:var(--ink3);font-size:16px;padding:6px}
+/* onboarding */
+.ob{padding:34px 22px 24px;flex:1;display:flex;flex-direction:column}
+.ob h1{font-size:24px;margin-bottom:6px}
+.fw{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:11px;text-align:left;width:100%}
+.fw.sel{border-color:var(--accent);background:var(--accent-bg)}
+.fw .n{font-weight:600;font-size:16px}
+.fw .badge{display:inline-block;font-size:11px;font-weight:600;background:var(--accent);color:#fff;padding:2px 9px;border-radius:99px;margin-left:8px;vertical-align:2px}
+.fw .d{font-size:13px;color:var(--ink2);margin-top:3px}
+/* settings rows */
+.srow{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.srow input.pct{width:64px;text-align:center;padding:10px 6px}
+.srow input.nm{flex:1}
+.srow input.ic{width:52px;text-align:center;padding:10px 4px}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;white-space:nowrap}
+.toast.show{opacity:1}
+.center{text-align:center}
+.mt{margin-top:14px}.mb{margin-bottom:14px}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const LS = "chitieu_v1";
+const FW = [
+  {id:"s70", name:"70 / 20 / 10", min:0, desc:"Thu nhập vừa đủ chi tiêu — ưu tiên xây quỹ dự phòng trước.",
+   jars:[{name:"Thiết yếu",icon:"🏠",pct:70,save:false},{name:"Dự phòng",icon:"🛡️",pct:20,save:true},{name:"Cá nhân",icon:"🎈",pct:10,save:false}]},
+  {id:"s50", name:"50 / 30 / 20", min:10e6, desc:"Cân bằng giữa nhu cầu, mong muốn và tích lũy.",
+   jars:[{name:"Thiết yếu",icon:"🏠",pct:50,save:false},{name:"Mong muốn",icon:"🎉",pct:30,save:false},{name:"Tiết kiệm",icon:"💰",pct:20,save:true}]},
+  {id:"s6j", name:"6 hũ JARS", min:25e6, desc:"Thu nhập dư dả — tối ưu tích sản và phát triển bản thân.",
+   jars:[{name:"Thiết yếu",icon:"🏠",pct:55,save:false},{name:"Tự do tài chính",icon:"📈",pct:10,save:true},{name:"Giáo dục",icon:"📚",pct:10,save:false},{name:"Hưởng thụ",icon:"🎉",pct:10,save:false},{name:"Tiết kiệm dài hạn",icon:"💰",pct:10,save:true},{name:"Cho đi",icon:"❤️",pct:5,save:false}]},
+];
+
+let S = load();
+let view = "home";
+let add = {step:1, amt:"", jar:null, note:""};
+let ob = {step:1, income:"", fw:null, jars:[]};
+
+function load(){
+  try{ const d = JSON.parse(localStorage.getItem(LS)); if(d && d.jars) return d; }catch(e){}
+  return {setup:false, income:0, jars:[], txns:[]};
+}
+function save(){ localStorage.setItem(LS, JSON.stringify(S)); }
+
+const fmt = n => Math.round(n).toLocaleString("vi-VN") + "₫";
+const fmtShort = n => n >= 1e6 ? (Math.round(n/1e5)/10).toLocaleString("vi-VN") + " tr" : Math.round(n/1e3).toLocaleString("vi-VN") + "k";
+const pad2 = n => String(n).padStart(2,"0");
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function monthKey(off){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()+(off||0)); return d.getFullYear()+"-"+pad2(d.getMonth()+1); }
+
+function calc(){
+  const mk = monthKey(0);
+  const mtx = S.txns.filter(t=>t.d.startsWith(mk));
+  const byJar = {};
+  mtx.forEach(t=>{ byJar[t.jar]=(byJar[t.jar]||0)+t.amt; });
+  const spendJars = S.jars.filter(j=>!j.save);
+  const spendBudget = spendJars.reduce((s,j)=>s+S.income*j.pct/100,0);
+  const spentSpend = spendJars.reduce((s,j)=>s+(byJar[j.id]||0),0);
+  const now = new Date();
+  const dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const daysLeft = dim - now.getDate() + 1;
+  const remain = spendBudget - spentSpend;
+  return {mtx, byJar, spendBudget, spentSpend, remain,
+    sts: remain/daysLeft, daysLeft,
+    totalSpent: mtx.filter(t=>!jarOf(t.jar).save).reduce((s,t)=>s+t.amt,0),
+    saved: mtx.filter(t=>jarOf(t.jar).save).reduce((s,t)=>s+t.amt,0)};
+}
+function jarOf(id){ return S.jars.find(j=>j.id===id) || {name:"Khác",icon:"❓",pct:0,save:false}; }
+function barColor(p){ return p>=100 ? "var(--bad)" : p>=80 ? "var(--warn)" : "var(--ok)"; }
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+/* ---------- views ---------- */
+function render(){
+  const app = document.getElementById("app");
+  if(!S.setup){ app.innerHTML = vOnboard(); return; }
+  let body = "";
+  if(view==="home") body = vHome();
+  else if(view==="add") body = vAdd();
+  else if(view==="history") body = vHistory();
+  else if(view==="stats") body = vStats();
+  else if(view==="settings") body = vSettings();
+  app.innerHTML = body + vNav();
+  if(view==="add" && add.step===2){ const n=document.getElementById("note"); if(n) n.value = add.note; }
+}
+
+function vNav(){
+  const it = (v,ic,lb) => `<button class="${view===v?'on':''}" onclick="go('${v}')"><span class="ic">${ic}</span>${lb}</button>`;
+  return `<nav class="nav">
+    ${it("home","⌂","Tổng quan")}
+    ${it("stats","📊","Báo cáo")}
+    <button class="fab" onclick="goAdd()" aria-label="Thêm giao dịch">+</button>
+    ${it("history","🧾","Lịch sử")}
+    ${it("settings","⚙","Cài đặt")}
+  </nav>`;
+}
+function go(v){ view = v; render(); }
+function goAdd(){ add = {step:1, amt:"", jar:null, note:""}; view="add"; render(); }
+
+function vHome(){
+  const c = calc();
+  const mNames = ["1","2","3","4","5","6","7","8","9","10","11","12"];
+  const now = new Date();
+  const jarsHtml = S.jars.map(j=>{
+    const bud = S.income*j.pct/100;
+    const sp = c.byJar[j.id]||0;
+    const p = bud>0 ? sp/bud*100 : 0;
+    return `<div class="jar">
+      <div class="top"><span class="nm">${j.icon} ${esc(j.name)}${j.save?' <span class="tiny">(tiết kiệm)</span>':''}</span>
+      <span style="color:${p>=100?'var(--bad)':p>=80?'var(--warn)':'var(--ink2)'}">${fmtShort(sp)} / ${fmtShort(bud)}</span></div>
+      <div class="bar"><i style="width:${Math.min(100,p)}%;background:${j.save?'var(--accent)':barColor(p)}"></i></div>
+    </div>`;
+  }).join("");
+  return `<div class="screen">
+    <div class="row"><h1 class="grow">Tháng ${mNames[now.getMonth()]}, ${now.getFullYear()}</h1><span class="tiny">còn ${c.daysLeft} ngày</span></div>
+    <div class="hero">
+      <div class="lbl">Hôm nay có thể tiêu</div>
+      <div class="amt ${c.sts<0?'over':''}">${fmt(Math.max(0,c.sts))}</div>
+      <div class="tiny">${c.remain>=0 ? "Còn "+fmt(c.remain)+" cho "+c.daysLeft+" ngày" : "Đã vượt ngân sách "+fmt(-c.remain)}</div>
+    </div>
+    <div class="stats2">
+      <div class="stat"><div class="tiny">Đã chi tháng này</div><div class="v">${fmt(c.totalSpent)}</div></div>
+      <div class="stat"><div class="tiny">Đã bỏ hũ tiết kiệm</div><div class="v pos">${fmt(c.saved)}</div></div>
+    </div>
+    <h2>Hũ ngân sách</h2>
+    ${jarsHtml}
+  </div>`;
+}
+
+/* ---------- add ---------- */
+function vAdd(){
+  if(add.step===1){
+    const disp = add.amt ? Number(add.amt).toLocaleString("vi-VN")+"₫" : "0₫";
+    const keys = ["1","2","3","4","5","6","7","8","9","000","0","⌫"];
+    return `<div class="screen">
+      <h1>Thêm giao dịch</h1>
+      <div class="amtbox"><div class="tiny">Số tiền</div><div class="a">${disp}</div></div>
+      <div class="pad">${keys.map(k=>`<button onclick="key('${k}')">${k}</button>`).join("")}</div>
+      <button class="btn" onclick="addNext()" ${add.amt&&Number(add.amt)>0?"":"disabled"}>Tiếp tục</button>
+    </div>`;
+  }
+  const c = calc();
+  return `<div class="screen">
+    <h1>${fmt(Number(add.amt))} — chọn hũ</h1>
+    <div class="pick mt">${S.jars.map(j=>{
+      const bud=S.income*j.pct/100, sp=c.byJar[j.id]||0, r=bud-sp;
+      return `<button class="${add.jar===j.id?'sel':''}" onclick="pickJar('${j.id}')">
+        <span class="ico">${j.icon}</span><div class="n">${esc(j.name)}</div>
+        <div class="r ${r<0?'neg':''}">còn ${fmtShort(r)}</div></button>`;
+    }).join("")}</div>
+    <input type="text" id="note" placeholder="Ghi chú (vd: ăn sáng, xăng xe...)" oninput="add.note=this.value">
+    <div class="mt"></div>
+    <button class="btn" onclick="saveTx()" ${add.jar?"":"disabled"}>Lưu giao dịch</button>
+    <div class="mt"></div>
+    <button class="btn btn-ghost" onclick="add.step=1;render()">← Sửa số tiền</button>
+  </div>`;
+}
+function key(k){
+  if(k==="⌫") add.amt = add.amt.slice(0,-1);
+  else if(k==="000"){ if(add.amt && add.amt.length<=9) add.amt += "000"; }
+  else if(add.amt.length<12 && !(k==="0"&&!add.amt)) add.amt += k;
+  render();
+}
+function addNext(){ add.step=2; render(); }
+function pickJar(id){ add.jar=id; const n=document.getElementById("note"); if(n) add.note=n.value; render(); }
+function saveTx(){
+  S.txns.push({id:Date.now()+"", amt:Number(add.amt), jar:add.jar, note:add.note.trim(), d:todayStr()});
+  save();
+  const j = jarOf(add.jar);
+  const bud = S.income*j.pct/100;
+  const sp = S.txns.filter(t=>t.jar===j.id && t.d.startsWith(monthKey(0))).reduce((s,t)=>s+t.amt,0);
+  view="home"; render();
+  toast(sp>bud ? "⚠️ Vượt ngân sách hũ "+j.name+"!" : sp>bud*0.8 ? "Đã dùng "+Math.round(sp/bud*100)+"% hũ "+j.name : "Đã lưu ✓");
+}
+
+/* ---------- history ---------- */
+function vHistory(){
+  const groups = {};
+  [...S.txns].sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).forEach(t=>{
+    (groups[t.d]=groups[t.d]||[]).push(t);
+  });
+  const days = Object.keys(groups);
+  const body = days.length ? days.map(d=>{
+    const list = groups[d];
+    const tot = list.reduce((s,t)=>s+t.amt,0);
+    const [y,m,dd] = d.split("-");
+    return `<div class="day"><div class="dh"><span>${dd}/${m}/${y}${d===todayStr()?" · hôm nay":""}</span><span>${fmt(tot)}</span></div>
+      ${list.map(t=>{ const j=jarOf(t.jar); return `<div class="tx">
+        <span class="ico">${j.icon}</span>
+        <div class="grow"><div class="n">${esc(t.note)||esc(j.name)}</div><div class="s">${esc(j.name)}</div></div>
+        <span class="a">−${fmt(t.amt)}</span>
+        <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
+      </div>`;}).join("")}</div>`;
+  }).join("") : `<div class="center muted" style="padding:60px 0">Chưa có giao dịch nào.<br>Bấm nút + để ghi khoản chi đầu tiên.</div>`;
+  return `<div class="screen"><h1>Lịch sử</h1><div class="mt"></div>${body}</div>`;
+}
+function delTx(id){
+  if(!confirm("Xóa giao dịch này?")) return;
+  S.txns = S.txns.filter(t=>t.id!==id); save(); render(); toast("Đã xóa");
+}
+
+/* ---------- stats ---------- */
+function vStats(){
+  const c = calc();
+  const jarsHtml = S.jars.map(j=>{
+    const bud=S.income*j.pct/100, sp=c.byJar[j.id]||0, p=bud>0?sp/bud*100:0;
+    return `<div class="jar"><div class="top"><span class="nm">${j.icon} ${esc(j.name)}</span>
+      <span>${fmt(sp)} <span class="tiny">(${Math.round(p)}%)</span></span></div>
+      <div class="bar"><i style="width:${Math.min(100,p)}%;background:${j.save?'var(--accent)':barColor(p)}"></i></div></div>`;
+  }).join("");
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const mk = monthKey(-i);
+    const tot = S.txns.filter(t=>t.d.startsWith(mk) && !jarOf(t.jar).save).reduce((s,t)=>s+t.amt,0);
+    months.push({mk, tot});
+  }
+  const max = Math.max(...months.map(m=>m.tot), 1);
+  const chart = `<div class="card"><div class="tiny mb">Tổng chi 6 tháng gần nhất</div>
+    <div style="display:flex;align-items:flex-end;gap:8px;height:120px">
+    ${months.map(m=>`<div style="flex:1;text-align:center">
+      <div class="tiny" style="margin-bottom:3px">${m.tot?fmtShort(m.tot):""}</div>
+      <div style="height:${Math.max(4,m.tot/max*84)}px;background:${m.mk===monthKey(0)?'var(--accent)':'var(--line)'};border-radius:6px 6px 0 0"></div>
+      <div class="tiny" style="margin-top:4px">T${Number(m.mk.slice(5))}</div>
+    </div>`).join("")}</div></div>`;
+  return `<div class="screen"><h1>Báo cáo tháng ${Number(monthKey(0).slice(5))}</h1>
+    <div class="mt"></div>${chart}
+    <h2>Theo hũ</h2>${jarsHtml}
+    <div class="tiny center mt">Ngân sách chi tiêu: ${fmt(c.spendBudget)} · Đã chi: ${fmt(c.spentSpend)}</div>
+  </div>`;
+}
+
+/* ---------- settings ---------- */
+function vSettings(){
+  const tot = S.jars.reduce((s,j)=>s+Number(j.pct||0),0);
+  return `<div class="screen"><h1>Cài đặt</h1>
+    <h2>Thu nhập hàng tháng</h2>
+    <input type="tel" id="inc" value="${S.income}" inputmode="numeric">
+    <h2>Hũ ngân sách <span style="color:${tot===100?'var(--ok)':'var(--bad)'}">(tổng ${tot}%)</span></h2>
+    ${S.jars.map((j,i)=>`<div class="srow">
+      <input class="ic" value="${j.icon}" onchange="S.jars[${i}].icon=this.value">
+      <input class="nm" value="${esc(j.name)}" onchange="S.jars[${i}].name=this.value">
+      <input class="pct" type="number" value="${j.pct}" onchange="S.jars[${i}].pct=Number(this.value)||0">
+      <button onclick="S.jars[${i}].save=!S.jars[${i}].save;render()" title="Đánh dấu hũ tiết kiệm" style="font-size:18px;opacity:${j.save?1:.25}">💰</button>
+      <button onclick="delJar(${i})" style="color:var(--ink3)">✕</button>
+    </div>`).join("")}
+    <button class="btn btn-ghost" onclick="addJar()">+ Thêm hũ</button>
+    <div class="mt"></div>
+    <button class="btn" onclick="saveSettings()">Lưu thay đổi</button>
+    <h2>Dữ liệu</h2>
+    <button class="btn btn-ghost mb" onclick="exportData()">⬇ Xuất dữ liệu (JSON)</button>
+    <label class="btn btn-ghost mb" style="display:block">⬆ Nhập dữ liệu<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
+    <button class="btn btn-ghost" style="color:var(--bad)" onclick="resetAll()">Xóa toàn bộ dữ liệu</button>
+    <p class="tiny center mt">Dữ liệu lưu trên máy của bạn, không gửi đi đâu.<br>Mẹo: Thêm vào màn hình chính để dùng như app.</p>
+  </div>`;
+}
+function saveSettings(){
+  const inc = Number(document.getElementById("inc").value.replace(/\D/g,""));
+  if(inc>0) S.income = inc;
+  const tot = S.jars.reduce((s,j)=>s+Number(j.pct||0),0);
+  save(); render();
+  toast(tot===100 ? "Đã lưu ✓" : "Đã lưu — lưu ý tổng % là "+tot+"%");
+}
+function addJar(){ S.jars.push({id:"j"+Date.now(), name:"Hũ mới", icon:"🫙", pct:0, save:false}); render(); }
+function delJar(i){ if(confirm("Xóa hũ \""+S.jars[i].name+"\"? Giao dịch cũ của hũ vẫn giữ trong lịch sử.")){ S.jars.splice(i,1); save(); render(); } }
+function exportData(){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));
+  a.download = "chitieu-backup-"+todayStr()+".json"; a.click();
+}
+function importData(inp){
+  const f = inp.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{ try{ const d=JSON.parse(r.result); if(d.jars&&d.txns){ S=d; save(); render(); toast("Đã nhập dữ liệu ✓"); } else toast("File không hợp lệ"); }catch(e){ toast("File không hợp lệ"); } };
+  r.readAsText(f);
+}
+function resetAll(){ if(confirm("Xóa TOÀN BỘ dữ liệu? Không thể hoàn tác.")){ localStorage.removeItem(LS); S=load(); ob={step:1,income:"",fw:null,jars:[]}; view="home"; render(); } }
+
+/* ---------- onboarding ---------- */
+function vOnboard(){
+  if(ob.step===1){
+    return `<div class="ob">
+      <h1>Chào bạn 👋</h1>
+      <p class="muted">Quản lý chi tiêu theo hũ, cá nhân hóa theo thu nhập của bạn. Bắt đầu nhé.</p>
+      <h2>Thu nhập trung bình mỗi tháng?</h2>
+      <input type="tel" id="obinc" inputmode="numeric" placeholder="Ví dụ: 15000000" value="${ob.income}">
+      <div class="grow"></div>
+      <button class="btn mt" onclick="obNext1()">Tiếp tục</button>
+    </div>`;
+  }
+  if(ob.step===2){
+    const inc = Number(ob.income);
+    const sug = inc<10e6 ? "s70" : inc<=25e6 ? "s50" : "s6j";
+    return `<div class="ob">
+      <h1>Chọn khung phân bổ</h1>
+      <p class="muted mb">Với thu nhập ${fmt(inc)}, khung được đề xuất đã đánh dấu — bạn vẫn chỉnh được từng % ở bước sau.</p>
+      ${FW.map(f=>`<button class="fw ${ob.fw===f.id?'sel':''}" onclick="obPickFw('${f.id}')">
+        <span class="n">${f.name}</span>${f.id===sug?'<span class="badge">Đề xuất</span>':''}
+        <div class="d">${f.desc}</div>
+        <div class="tiny mt">${f.jars.map(j=>j.icon+" "+j.name+" "+j.pct+"%").join(" · ")}</div>
+      </button>`).join("")}
+      <div class="grow"></div>
+      <button class="btn" onclick="obNext2()" ${ob.fw?"":"disabled"}>Tiếp tục</button>
+    </div>`;
+  }
+  const inc = Number(ob.income);
+  const tot = ob.jars.reduce((s,j)=>s+Number(j.pct||0),0);
+  return `<div class="ob">
+    <h1>Tinh chỉnh định mức</h1>
+    <p class="muted mb">Kéo % theo thực tế của bạn — tổng nên bằng 100%. Hiện tại: <b style="color:${tot===100?'var(--ok)':'var(--bad)'}">${tot}%</b></p>
+    ${ob.jars.map((j,i)=>`<div class="srow">
+      <span style="font-size:20px">${j.icon}</span>
+      <span class="grow" style="font-size:14px">${esc(j.name)}<br><span class="tiny">${fmt(inc*j.pct/100)}/tháng</span></span>
+      <input class="pct" type="number" value="${j.pct}" onchange="ob.jars[${i}].pct=Number(this.value)||0;render()">
+    </div>`).join("")}
+    <div class="grow"></div>
+    <button class="btn" onclick="obFinish()" ${tot===100?"":"disabled"}>Hoàn tất — bắt đầu dùng</button>
+  </div>`;
+}
+function obNext1(){
+  const v = Number(document.getElementById("obinc").value.replace(/\D/g,""));
+  if(!v || v<1e6){ toast("Nhập thu nhập hợp lệ (VNĐ)"); return; }
+  ob.income = String(v); ob.step=2; render();
+}
+function obPickFw(id){ ob.fw=id; ob.jars = FW.find(f=>f.id===id).jars.map((j,i)=>({...j, id:"j"+i})); render(); }
+function obNext2(){ ob.step=3; render(); }
+function obFinish(){
+  S.income = Number(ob.income); S.jars = ob.jars; S.setup = true; S.txns = S.txns||[];
+  save(); view="home"; render(); toast("Sẵn sàng! Bấm + để ghi khoản chi đầu tiên");
+}
+
+function esc(s){ return String(s??"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+render();
+if("serviceWorker" in navigator && location.protocol!=="file:") navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
