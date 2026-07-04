@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#0f6e56">
+<meta name="theme-color" content="#101014">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -12,104 +12,148 @@
 <title>Chi Tiêu — Quản lý tài chính cá nhân</title>
 <style>
 :root{
-  --bg:#f6f5f0; --card:#ffffff; --ink:#1c1c1a; --ink2:#6b6a64; --ink3:#a3a29a;
-  --line:#e8e6de; --accent:#0f6e56; --accent-bg:#e1f5ee;
-  --ok:#1d9e75; --warn:#ba7517; --warn-bg:#faeeda; --bad:#e24b4a; --bad-bg:#fcebeb;
-  --r:14px;
+  --bg:#101014; --card:#1b1b22; --card2:#26262f; --ink:#f2f2f5; --ink2:#9d9da8; --ink3:#63636e;
+  --line:#2b2b34; --blue:#4f8ef7; --blue-bg:#1c2a44; --green:#34c77b; --green-bg:#15311f;
+  --red:#ff6b6b; --red-bg:#3a1c1c; --amber:#f5b942; --accent:#4f8ef7;
+  --r:16px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font-size:16px}
 body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
 #app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
-.screen{flex:1;padding:20px 18px 96px;overflow-y:auto}
-h1{font-size:20px;font-weight:600}
-h2{font-size:15px;font-weight:600;color:var(--ink2);margin:22px 0 10px}
+.screen{flex:1;padding:18px 16px 96px;overflow-y:auto}
+h1{font-size:20px;font-weight:700}
+h2{font-size:15px;font-weight:600;color:var(--ink);margin:22px 0 10px}
 .muted{color:var(--ink2);font-size:13px}
 .tiny{color:var(--ink3);font-size:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card{background:var(--card);border-radius:20px;padding:16px}
 .row{display:flex;align-items:center;gap:10px}
 .grow{flex:1}
 button{font:inherit;border:none;background:none;cursor:pointer;color:inherit}
-.btn{display:block;width:100%;padding:15px;border-radius:var(--r);background:var(--accent);color:#fff;font-size:16px;font-weight:600;text-align:center}
-.btn:disabled{opacity:.4}
-.btn-ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
-input[type=text],input[type=tel],input[type=number],input[type=date],select{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);-webkit-appearance:none}
-input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.mng{font-size:12px;color:var(--accent);font-weight:600;padding:4px 0 4px 10px;white-space:nowrap}
+.btn{display:block;width:100%;padding:15px;border-radius:var(--r);background:var(--blue);color:#fff;font-size:16px;font-weight:600;text-align:center}
+.btn:disabled{opacity:.35}
+.btn-ghost{background:var(--card);color:var(--ink)}
+input[type=text],input[type=tel],input[type=number],input[type=date],select{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);-webkit-appearance:none;color-scheme:dark}
+input:focus,select:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.mng{font-size:12px;color:var(--blue);font-weight:600;padding:4px 0 4px 10px;white-space:nowrap}
 .back{font-size:22px;padding:0 10px 2px 0;color:var(--ink2)}
-/* header */
-.hero{text-align:center;padding:26px 0 20px}
-.hero .lbl{font-size:13px;color:var(--ink2)}
-.hero .amt{font-size:38px;font-weight:700;letter-spacing:-.5px;margin:4px 0 2px}
-.hero .amt.over{color:var(--bad)}
-/* stat cards */
-.stats2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
-.stat .v{font-size:18px;font-weight:600;margin-top:2px}
+.pos{color:var(--green)}.neg{color:var(--red)}
+/* period tabs */
+.ptabs{display:flex;background:var(--card);border-radius:99px;padding:4px;gap:4px;margin-bottom:12px}
+.ptabs button{flex:1;padding:9px 0;border-radius:99px;font-size:13px;font-weight:600;color:var(--ink2)}
+.ptabs button.on{background:var(--blue);color:#fff}
+/* balance card */
+.balcard{background:var(--card);border-radius:24px;padding:18px 16px;text-align:center}
+.mnav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px}
+.mnav button{width:34px;height:34px;border-radius:50%;background:var(--card2);color:var(--blue);font-size:16px}
+.mnav button:disabled{opacity:.3}
+.mnav span{font-size:15px;font-weight:600}
+.balcard .lbl{font-size:13px;color:var(--ink2)}
+.balcard .total{font-size:36px;font-weight:800;letter-spacing:-.5px;margin:6px 0 12px}
+.inex{display:flex;border-top:1px solid var(--line);padding-top:12px}
+.inex>div{flex:1}
+.inex .v{font-size:16px;font-weight:700;margin-top:2px}
+.sts{margin-top:12px;background:var(--card2);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--ink2)}
+.sts b{color:var(--ink)}
+/* action buttons */
+.acts{display:flex;gap:10px;margin:14px 0 4px}
+.acts button{flex:1;padding:14px;border-radius:16px;font-size:15px;font-weight:700;color:#fff}
+.acts .tf{background:var(--blue)}
+.acts .aa{background:var(--green);color:#08130c}
+/* account rows */
+.acc{background:var(--card);border-radius:18px;padding:13px 14px;display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.acc .ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.acc .n{font-weight:700;font-size:15px}
+.acc .b{font-size:13px;font-weight:600;margin-top:2px}
 /* jars */
-.jar{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:10px}
+.jar{background:var(--card);border-radius:16px;padding:13px 14px;margin-bottom:9px}
 .jar .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px}
 .jar .nm{font-weight:500}
-.bar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar{height:7px;background:var(--card2);border-radius:4px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:4px}
 .catline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-top:7px}
 /* bottom nav */
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(27,27,34,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
 .nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink3);padding:4px 10px;min-width:56px}
-.nav button.on{color:var(--accent);font-weight:600}
+.nav button.on{color:var(--blue);font-weight:600}
 .nav .ic{font-size:21px;line-height:1}
-.nav .fab{width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;margin-top:-24px;box-shadow:0 4px 12px rgba(15,110,86,.35)}
-/* numpad */
-.amtbox{text-align:center;padding:30px 0 18px}
-.amtbox .a{font-size:40px;font-weight:700;min-height:52px}
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
-.pad button{background:var(--card);border:1px solid var(--line);border-radius:var(--r);font-size:24px;font-weight:500;padding:16px 0}
-.pad button:active{background:var(--accent-bg)}
-/* jar picker */
-.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.pick button{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:13px 12px;text-align:left}
-.pick button.sel{border-color:var(--accent);background:var(--accent-bg)}
-.pick .ico{font-size:22px}
-.pick .n{font-weight:600;font-size:14px;margin-top:5px}
-.pick .r{font-size:12px;color:var(--ink2);margin-top:2px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.chip{background:var(--card);border:1.5px solid var(--line);border-radius:99px;padding:8px 15px;font-size:13px}
-.chip.sel{border-color:var(--accent);background:var(--accent-bg);font-weight:600;color:var(--accent)}
-/* list rows */
+.nav .fab{width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;margin-top:-24px;box-shadow:0 4px 14px rgba(79,142,247,.4)}
+/* add flow — photo first */
+.photostep{flex:1;display:flex;flex-direction:column;padding:18px 16px 30px}
+.photostep .opts{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.bigopt{display:block;background:var(--card);border-radius:20px;padding:22px;text-align:center;font-size:17px;font-weight:700}
+.bigopt.cam{background:var(--blue);color:#fff}
+.skip{text-align:center;color:var(--ink2);font-size:15px;padding:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:9px 16px;font-size:14px;font-weight:600;position:relative}
+.pill.sel{border-color:var(--blue);color:var(--blue)}
+.photo{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#23232c,#17171d);min-height:170px;margin-bottom:12px}
+.photo img.bgimg{width:100%;max-height:280px;object-fit:cover;display:block}
+.pov{position:absolute;left:0;right:0;bottom:0;padding:14px;background:rgba(16,16,20,.55);backdrop-filter:blur(6px)}
+.photo.nophoto .pov{position:static;background:none;padding:26px 14px}
+.bigamt{font-size:36px;font-weight:800;text-align:center;letter-spacing:-.5px}
+.bigamt .d{font-size:20px;font-weight:600;color:var(--ink2)}
+.pov input{margin-top:10px;background:rgba(38,38,47,.8);border:none;text-align:center}
+.chipsrow{display:flex;justify-content:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.toggle{display:flex;background:var(--card);border-radius:99px;padding:4px;gap:4px}
+.toggle button{padding:8px 18px;border-radius:99px;font-size:14px;font-weight:700;color:var(--ink2)}
+.toggle button.ex{background:var(--red);color:#fff}
+.toggle button.in{background:var(--green);color:#08130c}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.pad button{background:var(--card);border-radius:14px;font-size:22px;font-weight:600;padding:13px 0}
+.pad button:active{background:var(--card2)}
+.saverow{display:flex;gap:10px;align-items:center}
+.savebtn{width:62px;height:62px;border-radius:50%;background:var(--green);color:#08130c;font-size:26px;font-weight:800;flex-shrink:0}
+.savebtn:disabled{opacity:.35}
+/* sheets */
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:var(--card);border-radius:22px 22px 0 0;padding:18px 16px calc(22px + env(safe-area-inset-bottom));z-index:91;max-height:70vh;overflow-y:auto}
+.sheet h2{margin-top:0}
+.srowa{display:flex;align-items:center;gap:12px;padding:12px 8px;border-radius:14px}
+.srowa.sel{background:var(--card2)}
+/* history */
 .day{margin-bottom:16px}
 .day .dh{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-bottom:6px;padding:0 2px}
-.tx{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:11px;margin-bottom:7px}
+.tx{background:var(--card);border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:11px;margin-bottom:7px}
 .tx .ico{font-size:20px}
 .tx .n{font-size:14px;font-weight:500}
 .tx .s{font-size:12px;color:var(--ink3)}
-.tx .a{font-weight:600;font-size:14px;white-space:nowrap}
+.tx .a{font-weight:700;font-size:14px;white-space:nowrap}
 .tx .del{color:var(--ink3);font-size:16px;padding:6px}
 .tx.done .n,.tx.done .a{text-decoration:line-through;color:var(--ink3)}
-.paybtn{background:var(--accent-bg);color:var(--accent);font-size:13px;font-weight:600;padding:8px 14px;border-radius:99px}
-/* onboarding */
+.paybtn{background:var(--blue-bg);color:var(--blue);font-size:13px;font-weight:700;padding:8px 14px;border-radius:99px}
+.thumb{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.imgview{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.imgview img{max-width:92vw;max-height:74vh;border-radius:14px}
+.imgview .pill{background:var(--card)}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{background:var(--card2);border:1.5px solid transparent;border-radius:99px;padding:8px 15px;font-size:13px}
+.chip.sel{border-color:var(--blue);color:var(--blue);font-weight:700}
+/* charts */
+.cmp{display:flex;align-items:flex-end;gap:10px;height:130px;margin-top:8px}
+.cmp .g{flex:1;text-align:center}
+.cmp .bars{display:flex;gap:3px;align-items:flex-end;justify-content:center;height:96px}
+.cmp .bi{width:12px;border-radius:4px 4px 0 0;background:var(--green)}
+.cmp .be{width:12px;border-radius:4px 4px 0 0;background:var(--red)}
+/* onboarding + settings reuse */
 .ob{padding:34px 22px 24px;flex:1;display:flex;flex-direction:column}
 .ob h1{font-size:24px;margin-bottom:6px}
 .fw{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:11px;text-align:left;width:100%}
-.fw.sel{border-color:var(--accent);background:var(--accent-bg)}
-.fw .n{font-weight:600;font-size:16px}
-.fw .badge{display:inline-block;font-size:11px;font-weight:600;background:var(--accent);color:#fff;padding:2px 9px;border-radius:99px;margin-left:8px;vertical-align:2px}
+.fw.sel{border-color:var(--blue);background:var(--blue-bg)}
+.fw .n{font-weight:700;font-size:16px}
+.fw .badge{display:inline-block;font-size:11px;font-weight:700;background:var(--blue);color:#fff;padding:2px 9px;border-radius:99px;margin-left:8px;vertical-align:2px}
 .fw .d{font-size:13px;color:var(--ink2);margin-top:3px}
-/* settings rows */
 .srow{display:flex;align-items:center;gap:8px;margin-bottom:9px}
 .srow input.pct{width:64px;text-align:center;padding:10px 6px}
 .srow input.nm{flex:1}
 .srow input.ic{width:52px;text-align:center;padding:10px 4px}
-.thumb{width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}
-.imgview{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
-.imgview img{max-width:92vw;max-height:78vh;border-radius:12px}
 .attachprev{position:relative;display:inline-block;margin-bottom:14px}
-.attachprev img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
-.attachprev button{position:absolute;top:-8px;right:-8px;background:var(--ink);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;line-height:1}
-.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;white-space:nowrap}
+.attachprev img{width:84px;height:84px;object-fit:cover;border-radius:10px;display:block}
+.attachprev button{position:absolute;top:-8px;right:-8px;background:var(--ink);color:var(--bg);border-radius:50%;width:22px;height:22px;font-size:12px;line-height:1}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#f2f2f5;color:#111;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:300;white-space:nowrap}
 .toast.show{opacity:1}
 .center{text-align:center}
 .mt{margin-top:14px}.mb{margin-bottom:14px}
-.pos{color:var(--ok)}.neg{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -118,6 +162,7 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 <script>
 "use strict";
 const LS = "chitieu_v1";
+const ACC_COLORS = ["#34c77b","#4f8ef7","#f5b942","#b06ef7","#ff6b6b","#3ecfd4"];
 const FW = [
   {id:"s70", name:"70 / 20 / 10", min:0, desc:"Thu nhập vừa đủ chi tiêu — ưu tiên xây quỹ dự phòng trước.",
    jars:[{name:"Thiết yếu",icon:"🏠",pct:70,save:false},{name:"Dự phòng",icon:"🛡️",pct:20,save:true},{name:"Cá nhân",icon:"🎈",pct:10,save:false}]},
@@ -126,7 +171,6 @@ const FW = [
   {id:"s6j", name:"6 hũ JARS", min:25e6, desc:"Thu nhập dư dả — tối ưu tích sản và phát triển bản thân.",
    jars:[{name:"Thiết yếu",icon:"🏠",pct:55,save:false},{name:"Tự do tài chính",icon:"📈",pct:10,save:true},{name:"Giáo dục",icon:"📚",pct:10,save:false},{name:"Hưởng thụ",icon:"🎉",pct:10,save:false},{name:"Tiết kiệm dài hạn",icon:"💰",pct:10,save:true},{name:"Cho đi",icon:"❤️",pct:5,save:false}]},
 ];
-
 function defCats(name){
   const n = (name||"").toLowerCase();
   if(n.includes("thiết yếu")) return ["Ăn uống","Đi lại","Điện nước","Nhà ở","Y tế","Khác"];
@@ -139,7 +183,9 @@ function defCats(name){
 
 let S = load();
 let view = "home";
-let add = {step:1, amt:"", jar:null, cat:null, note:""};
+let mode = "cycle", off = 0, rptN = 6;
+let sheet = null, hq = "";
+let add = null;
 let ob = {step:1, income:"", payday:"1", fw:null, jars:[]};
 
 function load(){
@@ -150,14 +196,21 @@ function load(){
       d.debts = d.debts || [];
       d.fixed = d.fixed || [];
       d.jars.forEach(j=>{ if(!j.cats || !j.cats.length) j.cats = defCats(j.name); });
+      if(!d.accounts){
+        d.accounts = [{id:"a1",name:"Ví tiền mặt",icon:"👛",init:0},{id:"a2",name:"Ngân hàng",icon:"🏦",init:0}];
+        d.txns.forEach(t=>{ if(!t.type) t.type="ex"; if(!t.acc) t.acc="a1"; });
+      }
+      if(!d.incats) d.incats = ["Lương","Thưởng","Kinh doanh","Khác"];
       return d;
     }
   }catch(e){}
-  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[]};
+  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[],
+    accounts:[{id:"a1",name:"Ví tiền mặt",icon:"👛",init:0},{id:"a2",name:"Ngân hàng",icon:"🏦",init:0}],
+    incats:["Lương","Thưởng","Kinh doanh","Khác"]};
 }
 function save(){ localStorage.setItem(LS, JSON.stringify(S)); }
 
-/* ảnh hóa đơn lưu IndexedDB (localStorage không đủ chỗ) */
+/* ảnh hóa đơn lưu IndexedDB */
 function idbOpen(){ return new Promise((res,rej)=>{ const q=indexedDB.open("chitieu_img",1); q.onupgradeneeded=()=>q.result.createObjectStore("img"); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
 function imgPut(id,data){ return idbOpen().then(db=>new Promise((res,rej)=>{ const t=db.transaction("img","readwrite"); t.objectStore("img").put(data,id); t.oncomplete=res; t.onerror=()=>rej(t.error); })); }
 function imgGet(id){ return idbOpen().then(db=>new Promise(res=>{ const q=db.transaction("img").objectStore("img").get(id); q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); })).catch(()=>null); }
@@ -171,43 +224,74 @@ function loadImgs(){
 function viewImg(id){
   imgGet(id).then(d=>{
     if(!d){ toast("Không tìm thấy ảnh"); return; }
-    const o=document.createElement("div"); o.className="imgview"; o.onclick=()=>o.remove();
-    o.innerHTML=`<img src="${d}" alt="hóa đơn"><div class="tiny" style="color:#fff">Chạm để đóng</div>`;
+    const o=document.createElement("div"); o.className="imgview";
+    o.innerHTML=`<img src="${d}" alt="hóa đơn"><div class="row"><button class="pill" id="shareimg">↗ Chia sẻ</button><button class="pill" id="closeimg">Đóng</button></div>`;
+    o.querySelector("#closeimg").onclick=()=>o.remove();
+    o.querySelector("#shareimg").onclick=async(e)=>{
+      e.stopPropagation();
+      try{
+        const blob = await (await fetch(d)).blob();
+        const file = new File([blob],"hoadon.jpg",{type:"image/jpeg"});
+        if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file]});
+        else toast("Thiết bị không hỗ trợ chia sẻ");
+      }catch(err){}
+    };
+    o.onclick=(e)=>{ if(e.target===o||e.target.tagName==="IMG") o.remove(); };
     document.body.appendChild(o);
   });
 }
 
 const fmt = n => Math.round(n).toLocaleString("vi-VN") + "₫";
-const fmtShort = n => n >= 1e6 ? (Math.round(n/1e5)/10).toLocaleString("vi-VN") + " tr" : Math.round(n/1e3).toLocaleString("vi-VN") + "k";
+const fmtShort = n => Math.abs(n) >= 1e6 ? (Math.round(n/1e5)/10).toLocaleString("vi-VN") + " tr" : Math.round(n/1e3).toLocaleString("vi-VN") + "k";
 const pad2 = n => String(n).padStart(2,"0");
 const dstr = d => d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
 function todayStr(){ return dstr(new Date()); }
 
-/* chu kỳ lương: từ ngày nhận lương đến trước ngày nhận lương kế tiếp */
-function cycleRange(off){
+/* chu kỳ lương */
+function cycleRange(o){
   const now = new Date(); const pd = S.payday || 1;
   let s = new Date(now.getFullYear(), now.getMonth(), pd);
   if(now.getDate() < pd) s.setMonth(s.getMonth()-1);
-  s.setMonth(s.getMonth() + (off||0));
+  s.setMonth(s.getMonth() + (o||0));
   const e = new Date(s); e.setMonth(e.getMonth()+1); e.setDate(e.getDate()-1);
   return {s, e};
 }
 function cycleLabel(r){
-  if((S.payday||1)===1) return "Tháng "+(r.s.getMonth()+1)+", "+r.s.getFullYear();
-  return "Kỳ "+pad2(r.s.getDate())+"/"+pad2(r.s.getMonth()+1)+" – "+pad2(r.e.getDate())+"/"+pad2(r.e.getMonth()+1);
+  if((S.payday||1)===1) return "tháng "+(r.s.getMonth()+1)+" "+r.s.getFullYear();
+  return pad2(r.s.getDate())+"/"+pad2(r.s.getMonth()+1)+" – "+pad2(r.e.getDate())+"/"+pad2(r.e.getMonth()+1);
 }
-const inCycle = (t,r) => t.d >= dstr(r.s) && t.d <= dstr(r.e);
+const inRange = (t,r) => t.d >= dstr(r.s) && t.d <= dstr(r.e);
+function period(){
+  if(mode==="all") return null;
+  if(mode==="year"){ const y=new Date().getFullYear()+off; return {s:new Date(y,0,1), e:new Date(y,11,31), label:"năm "+y}; }
+  const r = cycleRange(off); r.label = cycleLabel(r); return r;
+}
+const inPeriod = t => { const p=period(); return !p || inRange(t,p); };
 function fixedDue(f,r){
   let d = new Date(r.s.getFullYear(), r.s.getMonth(), Math.min(f.day||1,28));
   if(d < r.s) d.setMonth(d.getMonth()+1);
   return d;
 }
 
+function accOf(id){ return S.accounts.find(a=>a.id===id) || {id:id,name:"(đã xóa)",icon:"❓"}; }
+function accBal(a){
+  let b = Number(a.init)||0;
+  S.txns.forEach(t=>{
+    if(t.type==="in" && t.acc===a.id) b += t.amt;
+    else if((t.type==="ex"||!t.type) && t.acc===a.id) b -= t.amt;
+    else if(t.type==="tf"){ if(t.acc===a.id) b -= t.amt; if(t.accTo===a.id) b += t.amt; }
+  });
+  return b;
+}
+function jarOf(id){ return S.jars.find(j=>j.id===id) || {name:"Khác",icon:"❓",pct:0,save:false,cats:["Khác"]}; }
+function barColor(p){ return p>=100 ? "var(--red)" : p>=80 ? "var(--amber)" : "var(--green)"; }
+
 function calc(){
-  const r = cycleRange(0);
-  const mtx = S.txns.filter(t=>inCycle(t,r));
+  const r = cycleRange(mode==="cycle" ? off : 0);
+  const mtx = S.txns.filter(t=>t.type!=="tf" && inRange(t,r));
+  const ex = mtx.filter(t=>t.type!=="in");
   const byJar = {}, byCat = {};
-  mtx.forEach(t=>{
+  ex.forEach(t=>{
     byJar[t.jar]=(byJar[t.jar]||0)+t.amt;
     const c = t.cat || "Khác";
     (byCat[t.jar]=byCat[t.jar]||{})[c]=(byCat[t.jar][c]||0)+t.amt;
@@ -218,13 +302,8 @@ function calc(){
   const now = new Date(); now.setHours(0,0,0,0);
   const daysLeft = Math.max(1, Math.round((r.e - now)/864e5)+1);
   const remain = spendBudget - spentSpend;
-  return {r, mtx, byJar, byCat, spendBudget, spentSpend, remain,
-    sts: remain/daysLeft, daysLeft,
-    totalSpent: mtx.filter(t=>!jarOf(t.jar).save).reduce((s,t)=>s+t.amt,0),
-    saved: mtx.filter(t=>jarOf(t.jar).save).reduce((s,t)=>s+t.amt,0)};
+  return {r, mtx, byJar, byCat, spendBudget, spentSpend, remain, sts: remain/daysLeft, daysLeft};
 }
-function jarOf(id){ return S.jars.find(j=>j.id===id) || {name:"Khác",icon:"❓",pct:0,save:false,cats:["Khác"]}; }
-function barColor(p){ return p>=100 ? "var(--bad)" : p>=80 ? "var(--warn)" : "var(--ok)"; }
 
 function toast(msg){
   const t = document.getElementById("toast");
@@ -244,39 +323,52 @@ function render(){
   else if(view==="settings") body = vSettings();
   else if(view==="debts") body = vDebts();
   else if(view==="fixed") body = vFixed();
-  app.innerHTML = body + vNav();
-  if(view==="add" && add.step===2){ const n=document.getElementById("note"); if(n) n.value = add.note; }
+  else if(view==="tf") body = vTransfer();
+  else if(view==="addacc") body = vAddAcc();
+  app.innerHTML = body + (view==="add" ? "" : vNav()) + vSheet();
+  if(view==="add" && add && add.step==="entry"){ const n=document.getElementById("note"); if(n) n.value = add.note; }
   loadImgs();
 }
-
 function vNav(){
   const it = (v,ic,lb) => `<button class="${view===v?'on':''}" onclick="go('${v}')"><span class="ic">${ic}</span>${lb}</button>`;
   return `<nav class="nav">
     ${it("home","⌂","Tổng quan")}
-    ${it("stats","📊","Báo cáo")}
+    ${it("stats","◔","Báo cáo")}
     <button class="fab" onclick="goAdd()" aria-label="Thêm giao dịch">+</button>
-    ${it("history","🧾","Lịch sử")}
+    ${it("history","≣","Lịch sử")}
     ${it("settings","⚙","Cài đặt")}
   </nav>`;
 }
-function go(v){ view = v; render(); }
-function goAdd(){ add = {step:1, amt:"", jar:null, cat:null, note:"", img:null}; view="add"; render(); }
+function go(v){ view = v; sheet=null; render(); }
+function setMode(m){ mode=m; off=0; render(); }
+function goAdd(){ add = {step:"photo", img:null, type:"ex", amt:"", acc:S.accounts[0]?S.accounts[0].id:null, jar:null, cat:null, note:"", d:todayStr()}; view="add"; render(); }
 const sec = (title, v) => `<h2 class="row"><span class="grow">${title}</span><button class="mng" onclick="go('${v}')">Quản lý ›</button></h2>`;
 
 /* ---------- home ---------- */
 function vHome(){
   const c = calc();
+  const p = period();
+  const pin = S.txns.filter(t=>t.type==="in" && inPeriod(t)).reduce((s,t)=>s+t.amt,0);
+  const pex = S.txns.filter(t=>(t.type==="ex"||!t.type) && inPeriod(t)).reduce((s,t)=>s+t.amt,0);
+  const total = S.accounts.reduce((s,a)=>s+accBal(a),0);
+  const accsHtml = S.accounts.map((a,i)=>{
+    const b = accBal(a);
+    return `<div class="acc">
+      <div class="ico" style="background:${ACC_COLORS[i%ACC_COLORS.length]}22;color:${ACC_COLORS[i%ACC_COLORS.length]}">${a.icon}</div>
+      <div class="grow"><div class="n">${esc(a.name)}</div>
+      <div class="b ${b<0?'neg':'pos'}">${fmt(b)}</div></div>
+    </div>`;
+  }).join("");
   const jarsHtml = S.jars.map(j=>{
     const bud = S.income*j.pct/100;
     const sp = c.byJar[j.id]||0;
-    const p = bud>0 ? sp/bud*100 : 0;
+    const pc = bud>0 ? sp/bud*100 : 0;
     return `<div class="jar">
       <div class="top"><span class="nm">${j.icon} ${esc(j.name)}${j.save?' <span class="tiny">(tiết kiệm)</span>':''}</span>
-      <span style="color:${p>=100?'var(--bad)':p>=80?'var(--warn)':'var(--ink2)'}">${fmtShort(sp)} / ${fmtShort(bud)}</span></div>
-      <div class="bar"><i style="width:${Math.min(100,p)}%;background:${j.save?'var(--accent)':barColor(p)}"></i></div>
+      <span style="color:${pc>=100?'var(--red)':pc>=80?'var(--amber)':'var(--ink2)'}">${fmtShort(sp)} / ${fmtShort(bud)}</span></div>
+      <div class="bar"><i style="width:${Math.min(100,pc)}%;background:${j.save?'var(--blue)':barColor(pc)}"></i></div>
     </div>`;
   }).join("");
-
   const paidFixed = new Set(c.mtx.filter(t=>t.fixedId).map(t=>t.fixedId));
   const today = todayStr();
   const fixedHtml = S.fixed.length ? S.fixed.map(f=>{
@@ -291,7 +383,6 @@ function vHome(){
       ${isPaid?"":`<button class="paybtn" onclick="payFixed('${f.id}')">Ghi</button>`}
     </div>`;
   }).join("") : `<p class="tiny">Chưa có — thêm tiền nhà, internet, học phí... để không quên.</p>`;
-
   const unpaid = S.debts.filter(d=>!d.paid);
   const debtTotal = unpaid.reduce((s,d)=>s+d.amount,0);
   const debtsHtml = unpaid.length ? unpaid.slice(0,4).map(d=>{
@@ -305,30 +396,43 @@ function vHome(){
     </div>`;
   }).join("") + (unpaid.length>4?`<p class="tiny center">+ ${unpaid.length-4} khoản khác trong mục Quản lý</p>`:"")
     : `<p class="tiny">Không có khoản nợ nào. Tuyệt!</p>`;
-
   return `<div class="screen">
-    <div class="row"><h1 class="grow">${cycleLabel(c.r)}</h1><span class="tiny">còn ${c.daysLeft} ngày</span></div>
-    <div class="hero">
-      <div class="lbl">Hôm nay có thể tiêu</div>
-      <div class="amt ${c.sts<0?'over':''}">${fmt(Math.max(0,c.sts))}</div>
-      <div class="tiny">${c.remain>=0 ? "Còn "+fmt(c.remain)+" cho "+c.daysLeft+" ngày" : "Đã vượt ngân sách "+fmt(-c.remain)}</div>
+    <div class="ptabs">
+      <button class="${mode==='cycle'?'on':''}" onclick="setMode('cycle')">${(S.payday||1)===1?'Tháng này':'Kỳ này'}</button>
+      <button class="${mode==='year'?'on':''}" onclick="setMode('year')">Năm nay</button>
+      <button class="${mode==='all'?'on':''}" onclick="setMode('all')">Tất cả</button>
     </div>
-    <div class="stats2">
-      <div class="stat"><div class="tiny">Đã chi kỳ này</div><div class="v">${fmt(c.totalSpent)}</div></div>
-      <div class="stat"><div class="tiny">Đã bỏ hũ tiết kiệm</div><div class="v pos">${fmt(c.saved)}</div></div>
+    <div class="balcard">
+      ${p ? `<div class="mnav">
+        <button onclick="off--;render()">‹</button><span>${p.label}</span>
+        <button onclick="off++;render()" ${off>=0?"disabled":""}>›</button>
+      </div>` : `<div class="mnav"><span>Toàn bộ thời gian</span></div>`}
+      <div class="lbl">Tổng số dư</div>
+      <div class="total ${total<0?'neg':'pos'}">${fmt(total)}</div>
+      <div class="inex">
+        <div><div class="tiny">↓ Thu nhập</div><div class="v pos">${fmt(pin)}</div></div>
+        <div><div class="tiny">↑ Chi tiêu</div><div class="v neg">${fmt(pex)}</div></div>
+      </div>
+      ${mode==="cycle"&&off===0 ? `<div class="sts">Hôm nay có thể tiêu <b>${fmt(Math.max(0,c.sts))}</b> · còn ${c.daysLeft} ngày</div>` : ""}
     </div>
-    ${sec("Chi phí cố định","fixed")}
-    ${fixedHtml}
-    ${sec("Nợ cần trả"+(debtTotal?` <span style="color:var(--bad)">· ${fmtShort(debtTotal)}</span>`:""),"debts")}
-    ${debtsHtml}
+    <div class="acts">
+      <button class="tf" onclick="go('tf')">⇆ Chuyển tiền</button>
+      <button class="aa" onclick="go('addacc')">+ Tài khoản</button>
+    </div>
+    <h2>Tài khoản</h2>
+    ${accsHtml}
     <h2>Hũ ngân sách</h2>
     ${jarsHtml}
+    ${sec("Chi phí cố định","fixed")}
+    ${fixedHtml}
+    ${sec("Khoản vay / nợ cần trả"+(debtTotal?` <span class="neg">· ${fmtShort(debtTotal)}</span>`:""),"debts")}
+    ${debtsHtml}
     ${S.txns.length ? sec("Gần đây","history") + [...S.txns].sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).slice(0,3).map(txRow).join("") : ""}
   </div>`;
 }
 function payFixed(id){
   const f = S.fixed.find(x=>x.id===id); if(!f) return;
-  S.txns.push({id:Date.now()+"", amt:f.amount, jar:f.jar, cat:"Cố định", note:f.name, fixedId:f.id, d:todayStr()});
+  S.txns.push({id:Date.now()+"", type:"ex", amt:f.amount, acc:f.acc||S.accounts[0].id, jar:f.jar, cat:"Cố định", note:f.name, fixedId:f.id, d:todayStr()});
   save(); render(); toast("Đã ghi "+f.name+" ✓");
 }
 function payDebt(id){
@@ -338,51 +442,62 @@ function payDebt(id){
   save(); render(); toast("Đã trả xong ✓");
 }
 
-/* ---------- add ---------- */
+/* ---------- add: camera-first ---------- */
 function vAdd(){
-  if(add.step===1){
-    const disp = add.amt ? Number(add.amt).toLocaleString("vi-VN")+"₫" : "0₫";
-    const keys = ["1","2","3","4","5","6","7","8","9","000","0","⌫"];
-    return `<div class="screen">
-      <h1>Thêm giao dịch</h1>
-      <div class="amtbox"><div class="tiny">Số tiền</div><div class="a">${disp}</div></div>
-      <div class="pad">${keys.map(k=>`<button onclick="key('${k}')">${k}</button>`).join("")}</div>
-      <button class="btn" onclick="addNext()" ${add.amt&&Number(add.amt)>0?"":"disabled"}>Tiếp tục</button>
+  if(add.step==="photo"){
+    return `<div class="photostep">
+      <div class="row"><button class="pill" onclick="go('home')">Hủy</button></div>
+      <div class="opts">
+        <label class="bigopt cam">📷 Chụp hóa đơn<input type="file" accept="image/*" capture="environment" style="display:none" onchange="attachImg(this)"></label>
+        <label class="bigopt">🖼️ Chọn từ thư viện<input type="file" accept="image/*" style="display:none" onchange="attachImg(this)"></label>
+      </div>
+      <button class="skip" onclick="add.step='entry';render()">Bỏ qua ảnh</button>
     </div>`;
   }
-  const c = calc();
+  const disp = add.amt ? Number(add.amt).toLocaleString("vi-VN") : "0";
   const j = add.jar ? jarOf(add.jar) : null;
-  const chips = j ? `<h2 style="margin-top:4px">Khoản chi cụ thể</h2><div class="chips">${j.cats.map((cat,i)=>
-    `<button class="chip ${add.cat===cat?'sel':''}" onclick="pickCat(${i})">${esc(cat)}</button>`).join("")}</div>` : "";
-  return `<div class="screen">
-    <h1>${fmt(Number(add.amt))} — chọn hũ</h1>
-    <div class="pick mt">${S.jars.map(jj=>{
-      const bud=S.income*jj.pct/100, sp=c.byJar[jj.id]||0, r=bud-sp;
-      return `<button class="${add.jar===jj.id?'sel':''}" onclick="pickJar('${jj.id}')">
-        <span class="ico">${jj.icon}</span><div class="n">${esc(jj.name)}</div>
-        <div class="r ${r<0?'neg':''}">còn ${fmtShort(r)}</div></button>`;
-    }).join("")}</div>
-    ${chips}
-    ${add.img
-      ? `<div class="attachprev"><img src="${add.img}" alt="hóa đơn"><button onclick="add.img=null;keepNote();render()" aria-label="Bỏ ảnh">✕</button></div>`
-      : `<label class="btn btn-ghost mb" style="display:block">📷 Chụp / đính kèm hóa đơn<input type="file" accept="image/*" capture="environment" style="display:none" onchange="attachImg(this)"></label>`}
-    <input type="text" id="note" placeholder="Ghi chú (vd: ăn sáng, xăng xe...)" oninput="add.note=this.value">
-    <div class="mt"></div>
-    <button class="btn" onclick="saveTx()" ${add.jar?"":"disabled"}>Lưu giao dịch</button>
-    <div class="mt"></div>
-    <button class="btn btn-ghost" onclick="add.step=1;render()">← Sửa số tiền</button>
+  const catLbl = add.type==="in"
+    ? (add.cat ? "💵 "+esc(add.cat) : "💵 Nguồn thu")
+    : (j ? j.icon+" "+esc(add.cat||j.name) : "🏷️ Danh mục");
+  const a = accOf(add.acc);
+  const dd = add.d===todayStr() ? "Hôm nay" : add.d.slice(8,10)+"/"+add.d.slice(5,7);
+  const keys = ["1","2","3","4","5","6","7","8","9","000","0","⌫"];
+  return `<div class="screen" style="padding-bottom:24px">
+    <div class="row mb"><button class="pill" onclick="go('home')">Hủy</button></div>
+    <div class="photo ${add.img?'':'nophoto'}">
+      ${add.img?`<img class="bgimg" src="${add.img}" alt="hóa đơn">`:""}
+      <div class="pov">
+        <div class="bigamt ${add.type==='in'?'pos':'neg'}">${add.type==='in'?'+':'−'} ${disp} <span class="d">đ</span></div>
+        <input type="text" id="note" placeholder="✏️ Thêm chi tiết" oninput="add.note=this.value">
+      </div>
+    </div>
+    <div class="chipsrow">
+      <button class="pill sel" onclick="openSheet('cat')">${catLbl} ▾</button>
+      <button class="pill" onclick="openSheet('acc')">${a.icon} ${esc(a.name)} ▾</button>
+    </div>
+    <div class="chipsrow">
+      <div class="toggle">
+        <button class="${add.type==='ex'?'ex':''}" onclick="setType('ex')">↗ Chi</button>
+        <button class="${add.type==='in'?'in':''}" onclick="setType('in')">↙ Thu</button>
+      </div>
+      <label class="pill">📅 ${dd}<input type="date" value="${add.d}" onchange="add.d=this.value;keepNote();render()" style="position:absolute;inset:0;opacity:0"></label>
+    </div>
+    <div class="pad">${keys.map(k=>`<button onclick="key('${k}')">${k}</button>`).join("")}</div>
+    <div class="saverow">
+      <label class="pill grow" style="justify-content:center;padding:14px">📷 ${add.img?"Chụp lại":"Thêm ảnh"}<input type="file" accept="image/*" capture="environment" style="display:none" onchange="attachImg(this)"></label>
+      <button class="savebtn" onclick="saveTx()" ${add.amt&&Number(add.amt)>0?"":"disabled"}>✓</button>
+    </div>
   </div>`;
 }
+function setType(t){ keepNote(); add.type=t; add.jar=null; add.cat=null; render(); }
 function key(k){
+  keepNote();
   if(k==="⌫") add.amt = add.amt.slice(0,-1);
   else if(k==="000"){ if(add.amt && add.amt.length<=9) add.amt += "000"; }
   else if(add.amt.length<12 && !(k==="0"&&!add.amt)) add.amt += k;
   render();
 }
-function addNext(){ add.step=2; render(); }
-function keepNote(){ const n=document.getElementById("note"); if(n) add.note=n.value; }
-function pickJar(id){ keepNote(); add.jar=id; add.cat=null; render(); }
-function pickCat(i){ keepNote(); const j=jarOf(add.jar); add.cat = (add.cat===j.cats[i]) ? null : j.cats[i]; render(); }
+function keepNote(){ const n=document.getElementById("note"); if(n && add) add.note=n.value; }
 function attachImg(inp){
   const f = inp.files[0]; if(!f) return;
   const img = new Image();
@@ -393,6 +508,7 @@ function attachImg(inp){
     cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
     add.img = cv.toDataURL("image/jpeg",0.72);
     URL.revokeObjectURL(img.src);
+    add.step = "entry";
     keepNote(); render();
   };
   img.onerror = ()=>{ URL.revokeObjectURL(img.src); toast("Không đọc được ảnh"); };
@@ -400,30 +516,134 @@ function attachImg(inp){
 }
 function saveTx(){
   keepNote();
+  const amt = Number(add.amt); if(!amt) return;
   const tid = Date.now()+"";
-  S.txns.push({id:tid, amt:Number(add.amt), jar:add.jar, cat:add.cat||"Khác", note:add.note.trim(), d:todayStr(), hasImg:!!add.img});
+  const t = {id:tid, type:add.type, amt, acc:add.acc, note:add.note.trim(), d:add.d||todayStr(), hasImg:!!add.img};
+  if(add.type==="ex"){
+    const sj = S.jars.filter(x=>!x.save)[0] || S.jars[0];
+    t.jar = add.jar || (sj && sj.id);
+    t.cat = add.cat || "Khác";
+  } else t.cat = add.cat || "Khác";
+  S.txns.push(t);
   if(add.img) imgPut(tid, add.img);
   save();
-  const j = jarOf(add.jar);
-  const bud = S.income*j.pct/100;
-  const r = cycleRange(0);
-  const sp = S.txns.filter(t=>t.jar===j.id && inCycle(t,r)).reduce((s,t)=>s+t.amt,0);
-  view="home"; render();
-  toast(sp>bud ? "⚠️ Vượt ngân sách hũ "+j.name+"!" : sp>bud*0.8 ? "Đã dùng "+Math.round(sp/bud*100)+"% hũ "+j.name : "Đã lưu ✓");
+  let msg = "Đã lưu ✓";
+  if(t.type==="ex" && t.jar){
+    const j = jarOf(t.jar);
+    const bud = S.income*j.pct/100;
+    const r = cycleRange(0);
+    const sp = S.txns.filter(x=>(x.type==="ex"||!x.type) && x.jar===j.id && inRange(x,r)).reduce((s,x)=>s+x.amt,0);
+    if(bud>0 && sp>bud) msg = "⚠️ Vượt ngân sách hũ "+j.name+"!";
+    else if(bud>0 && sp>bud*0.8) msg = "Đã dùng "+Math.round(sp/bud*100)+"% hũ "+j.name;
+  }
+  view="home"; render(); toast(msg);
+}
+
+/* ---------- sheets ---------- */
+function openSheet(s){ keepNote(); sheet=s; render(); }
+function closeSheet(){ sheet=null; render(); }
+function vSheet(){
+  if(!sheet) return "";
+  let inner = "";
+  if(sheet==="cat"){
+    if(add.type==="in"){
+      inner = `<h2>Nguồn thu</h2><div class="chips">${S.incats.map((c,i)=>
+        `<button class="chip ${add.cat===c?'sel':''}" onclick="pickInCat(${i})">${esc(c)}</button>`).join("")}</div>`;
+    } else {
+      inner = `<h2>Chọn hũ và khoản chi</h2>` + S.jars.map(j=>
+        `<div class="tiny" style="margin:12px 0 7px">${j.icon} ${esc(j.name)}</div>
+        <div class="chips">${j.cats.map((c,ci)=>
+          `<button class="chip ${add.jar===j.id&&add.cat===c?'sel':''}" onclick="pickJarCat('${j.id}',${ci})">${esc(c)}</button>`).join("")}</div>`
+      ).join("");
+    }
+  }
+  if(sheet==="acc"){
+    inner = `<h2>Chọn tài khoản</h2>` + S.accounts.map((a,i)=>{
+      const b = accBal(a);
+      return `<button class="srowa ${add.acc===a.id?'sel':''}" style="width:100%" onclick="pickAcc('${a.id}')">
+        <div class="ico" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${ACC_COLORS[i%ACC_COLORS.length]}22;color:${ACC_COLORS[i%ACC_COLORS.length]};font-size:18px">${a.icon}</div>
+        <div class="grow" style="text-align:left"><div style="font-weight:700">${esc(a.name)}</div>
+        <div class="tiny ${b<0?'neg':'pos'}">${fmt(b)}</div></div>
+        ${add.acc===a.id?'<span style="color:var(--blue)">✓</span>':''}
+      </button>`;
+    }).join("");
+  }
+  return `<div class="sheetbg" onclick="closeSheet()"></div><div class="sheet">${inner}</div>`;
+}
+function pickJarCat(jid,ci){ add.jar=jid; add.cat=jarOf(jid).cats[ci]; sheet=null; render(); }
+function pickInCat(i){ add.cat=S.incats[i]; sheet=null; render(); }
+function pickAcc(id){ add.acc=id; sheet=null; render(); }
+
+/* ---------- transfer & accounts ---------- */
+function vTransfer(){
+  return `<div class="screen">
+    <h1 class="row"><button class="back" onclick="go('home')">‹</button>Chuyển tiền</h1>
+    <div class="card mt">
+      <div class="tiny" style="margin-bottom:4px">Từ tài khoản</div>
+      <select id="tfrom" class="mb">${S.accounts.map(a=>`<option value="${a.id}">${a.icon} ${esc(a.name)} (${fmt(accBal(a))})</option>`).join("")}</select>
+      <div class="tiny" style="margin-bottom:4px">Đến tài khoản</div>
+      <select id="tto" class="mb">${S.accounts.map((a,i)=>`<option value="${a.id}" ${i===1?"selected":""}>${a.icon} ${esc(a.name)}</option>`).join("")}</select>
+      <input type="tel" id="tamt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb">
+      <button class="btn" onclick="doTransfer()">⇆ Chuyển tiền</button>
+    </div>
+    <h2>Lịch sử chuyển tiền</h2>
+    ${S.txns.filter(t=>t.type==="tf").sort((a,b)=>b.d.localeCompare(a.d)).slice(0,10).map(txRow).join("") || `<p class="tiny">Chưa có giao dịch chuyển tiền.</p>`}
+  </div>`;
+}
+function doTransfer(){
+  const from = document.getElementById("tfrom").value;
+  const to = document.getElementById("tto").value;
+  const amt = Number(document.getElementById("tamt").value.replace(/\D/g,""));
+  if(from===to){ toast("Hai tài khoản phải khác nhau"); return; }
+  if(!amt){ toast("Nhập số tiền"); return; }
+  S.txns.push({id:Date.now()+"", type:"tf", amt, acc:from, accTo:to, d:todayStr(), note:""});
+  save(); go("home"); toast("Đã chuyển "+fmt(amt)+" ✓");
+}
+function vAddAcc(){
+  return `<div class="screen">
+    <h1 class="row"><button class="back" onclick="go('home')">‹</button>Thêm tài khoản</h1>
+    <div class="card mt">
+      <input type="text" id="aname" placeholder="Tên tài khoản (vd: Momo, TPBank...)" class="mb">
+      <div class="row mb">
+        <div style="width:90px"><div class="tiny" style="margin-bottom:4px">Icon</div>
+        <input type="text" id="aicon" value="💳" style="text-align:center"></div>
+        <div class="grow"><div class="tiny" style="margin-bottom:4px">Số dư hiện có</div>
+        <input type="tel" id="ainit" inputmode="numeric" placeholder="0"></div>
+      </div>
+      <button class="btn" onclick="addAcc()">Thêm tài khoản</button>
+    </div>
+  </div>`;
+}
+function addAcc(){
+  const name = document.getElementById("aname").value.trim();
+  const icon = document.getElementById("aicon").value.trim() || "💳";
+  const init = Number(document.getElementById("ainit").value.replace(/\D/g,"")) || 0;
+  if(!name){ toast("Nhập tên tài khoản"); return; }
+  S.accounts.push({id:"a"+Date.now(), name, icon, init});
+  save(); go("home"); toast("Đã thêm "+name+" ✓");
 }
 
 /* ---------- history ---------- */
-let hq = "";
 function txRow(t){
-  const j = jarOf(t.jar);
-  const sub = esc(j.name)+(t.cat&&t.cat!=="Khác"?" · "+esc(t.cat):"");
+  if(t.type==="tf"){
+    return `<div class="tx">
+      <span class="ico">⇆</span>
+      <div class="grow"><div class="n">${esc(accOf(t.acc).name)} → ${esc(accOf(t.accTo).name)}</div><div class="s">Chuyển tiền · ${t.d.slice(8,10)}/${t.d.slice(5,7)}</div></div>
+      <span class="a">${fmt(t.amt)}</span>
+      <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
+    </div>`;
+  }
+  const isIn = t.type==="in";
+  const j = isIn ? null : jarOf(t.jar);
+  const a = accOf(t.acc);
+  const sub = (isIn ? "Thu nhập"+(t.cat&&t.cat!=="Khác"?" · "+esc(t.cat):"") : esc(j.name)+(t.cat&&t.cat!=="Khác"?" · "+esc(t.cat):"")) + " · " + esc(a.name);
   const lead = t.hasImg
     ? `<img class="thumb" data-img="${t.id}" onclick="viewImg('${t.id}')" alt="hóa đơn" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">`
-    : `<span class="ico">${j.icon}</span>`;
+    : `<span class="ico">${isIn?"💵":j.icon}</span>`;
   return `<div class="tx">
     ${lead}
-    <div class="grow"><div class="n">${esc(t.note)||esc(t.cat||j.name)}</div><div class="s">${sub}</div></div>
-    <span class="a">−${fmt(t.amt)}</span>
+    <div class="grow"><div class="n">${esc(t.note)||esc(t.cat|| (isIn?"Thu nhập":j.name))}</div><div class="s">${sub}</div></div>
+    <span class="a ${isIn?'pos':''}">${isIn?"+":"−"}${fmt(t.amt)}</span>
     <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
   </div>`;
 }
@@ -433,7 +653,8 @@ function hList(){
     if(!q) return true;
     const j = jarOf(t.jar);
     return (t.note||"").toLowerCase().includes(q) || j.name.toLowerCase().includes(q)
-      || (t.cat||"").toLowerCase().includes(q) || String(t.amt).includes(q.replace(/\D/g,"")||"~");
+      || (t.cat||"").toLowerCase().includes(q) || accOf(t.acc).name.toLowerCase().includes(q)
+      || String(t.amt).includes(q.replace(/\D/g,"")||"~");
   };
   const groups = {};
   [...S.txns].filter(match).sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).forEach(t=>{
@@ -442,16 +663,16 @@ function hList(){
   const days = Object.keys(groups);
   return days.length ? days.map(d=>{
     const list = groups[d];
-    const tot = list.reduce((s,t)=>s+t.amt,0);
+    const tot = list.filter(t=>t.type!=="tf").reduce((s,t)=>s+(t.type==="in"?t.amt:-t.amt),0);
     const [y,m,dd] = d.split("-");
-    return `<div class="day"><div class="dh"><span>${dd}/${m}/${y}${d===todayStr()?" · hôm nay":""}</span><span>${fmt(tot)}</span></div>
+    return `<div class="day"><div class="dh"><span>${dd}/${m}/${y}${d===todayStr()?" · hôm nay":""}</span><span class="${tot<0?'':'pos'}">${tot>0?"+":""}${fmt(tot)}</span></div>
       ${list.map(txRow).join("")}</div>`;
   }).join("") : `<div class="center muted" style="padding:60px 0">${q ? "Không tìm thấy giao dịch nào." : "Chưa có giao dịch nào.<br>Bấm nút + để ghi khoản chi đầu tiên."}</div>`;
 }
 function vHistory(){
   return `<div class="screen"><h1>Lịch sử</h1>
     <div class="mt"></div>
-    <input type="text" placeholder="🔍 Tìm theo ghi chú, hũ, khoản chi, số tiền..." value="${esc(hq)}"
+    <input type="text" placeholder="🔍 Tìm theo ghi chú, hũ, danh mục, tài khoản..." value="${esc(hq)}"
       oninput="hq=this.value;document.getElementById('hlist').innerHTML=hList();loadImgs()">
     <div class="mt"></div>
     <div id="hlist">${hList()}</div>
@@ -480,7 +701,7 @@ function vDebts(){
     </div>`;
   };
   return `<div class="screen">
-    <h1 class="row"><button class="back" onclick="go('home')">‹</button>Khoản nợ cần trả</h1>
+    <h1 class="row"><button class="back" onclick="go('home')">‹</button>Khoản vay / nợ</h1>
     <div class="card mt">
       <div class="tiny mb">Thêm khoản nợ / khoản cần thanh toán</div>
       <input type="text" id="dname" placeholder="Nợ ai / khoản gì (vd: trả góp điện thoại)" class="mb">
@@ -489,7 +710,7 @@ function vDebts(){
       <input type="date" id="ddue" class="mb">
       <button class="btn" onclick="addDebt()">Thêm khoản nợ</button>
     </div>
-    <h2>Đang nợ${total?` — tổng <span style="color:var(--bad)">${fmt(total)}</span>`:""}</h2>
+    <h2>Đang nợ${total?` — tổng <span class="neg">${fmt(total)}</span>`:""}</h2>
     ${unpaid.length ? unpaid.map(row).join("") : `<p class="tiny">Không có khoản nợ nào.</p>`}
     ${paid.length ? `<h2>Đã trả xong</h2>`+paid.map(row).join("") : ""}
   </div>`;
@@ -508,7 +729,7 @@ function delDebt(id){
   S.debts = S.debts.filter(d=>d.id!==id); save(); render(); toast("Đã xóa");
 }
 
-/* ---------- fixed costs ---------- */
+/* ---------- fixed ---------- */
 function vFixed(){
   const c = calc();
   const paidFixed = new Set(c.mtx.filter(t=>t.fixedId).map(t=>t.fixedId));
@@ -538,6 +759,8 @@ function vFixed(){
         <div class="grow"><div class="tiny" style="margin-bottom:4px">Trừ vào hũ</div>
         <select id="fjar">${S.jars.map(j=>`<option value="${j.id}">${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>
       </div>
+      <div class="tiny" style="margin-bottom:4px">Trừ từ tài khoản</div>
+      <select id="facc" class="mb">${S.accounts.map(a=>`<option value="${a.id}">${a.icon} ${esc(a.name)}</option>`).join("")}</select>
       <button class="btn" onclick="addFixed()">Thêm chi phí cố định</button>
     </div>
     <h2>Danh sách${total?` — tổng <b>${fmt(total)}</b>/tháng`:""}</h2>
@@ -549,9 +772,10 @@ function addFixed(){
   const amt = Number(document.getElementById("famt").value.replace(/\D/g,""));
   const day = Math.min(28, Math.max(1, Number(document.getElementById("fday").value)||1));
   const jar = document.getElementById("fjar").value;
+  const acc = document.getElementById("facc").value;
   if(!name){ toast("Nhập tên khoản chi"); return; }
   if(!amt){ toast("Nhập số tiền"); return; }
-  S.fixed.push({id:"f"+Date.now(), name, amount:amt, day, jar});
+  S.fixed.push({id:"f"+Date.now(), name, amount:amt, day, jar, acc});
   save(); render(); toast("Đã thêm ✓");
 }
 function delFixed(id){
@@ -562,32 +786,48 @@ function delFixed(id){
 /* ---------- stats ---------- */
 function vStats(){
   const c = calc();
+  const total = S.accounts.reduce((s,a)=>s+accBal(a),0);
+  const groups = [];
+  for(let i=rptN-1;i>=0;i--){
+    const r = cycleRange(-i);
+    const inc = S.txns.filter(t=>t.type==="in" && inRange(t,r)).reduce((s,t)=>s+t.amt,0);
+    const exp = S.txns.filter(t=>(t.type==="ex"||!t.type) && inRange(t,r)).reduce((s,t)=>s+t.amt,0);
+    groups.push({lb:"T"+(r.s.getMonth()+1), inc, exp});
+  }
+  const max = Math.max(...groups.map(g=>Math.max(g.inc,g.exp)), 1);
+  const avg = groups.reduce((s,g)=>s+g.exp,0)/rptN;
+  const chart = `<div class="card">
+    <div class="row"><div class="grow">
+      <div style="font-weight:700">So sánh theo kỳ</div>
+      <div class="tiny">Trung bình chi tiêu · ${fmt(avg)}</div></div>
+      <div class="ptabs" style="margin:0;padding:3px">${[3,6,9].map(n=>`<button style="padding:6px 12px" class="${rptN===n?'on':''}" onclick="rptN=${n};render()">${n} kỳ</button>`).join("")}</div>
+    </div>
+    <div class="cmp">${groups.map(g=>`<div class="g">
+      <div class="bars">
+        <div class="bi" style="height:${Math.max(3,g.inc/max*92)}px"></div>
+        <div class="be" style="height:${Math.max(3,g.exp/max*92)}px"></div>
+      </div>
+      <div class="tiny" style="margin-top:5px">${g.lb}</div>
+    </div>`).join("")}</div>
+    <div class="row tiny" style="justify-content:center;gap:16px;margin-top:8px">
+      <span><span style="color:var(--green)">●</span> Thu nhập</span>
+      <span><span style="color:var(--red)">●</span> Chi tiêu</span>
+    </div>
+  </div>`;
   const jarsHtml = S.jars.map(j=>{
     const bud=S.income*j.pct/100, sp=c.byJar[j.id]||0, p=bud>0?sp/bud*100:0;
     const cats = Object.entries(c.byCat[j.id]||{}).sort((a,b)=>b[1]-a[1])
       .map(([cat,v])=>`<div class="catline"><span>· ${esc(cat)}</span><span>${fmt(v)}</span></div>`).join("");
     return `<div class="jar"><div class="top"><span class="nm">${j.icon} ${esc(j.name)}</span>
       <span>${fmt(sp)} <span class="tiny">(${Math.round(p)}%)</span></span></div>
-      <div class="bar"><i style="width:${Math.min(100,p)}%;background:${j.save?'var(--accent)':barColor(p)}"></i></div>
+      <div class="bar"><i style="width:${Math.min(100,p)}%;background:${j.save?'var(--blue)':barColor(p)}"></i></div>
       ${cats}</div>`;
   }).join("");
-  const cycles = [];
-  for(let i=5;i>=0;i--){
-    const r = cycleRange(-i);
-    const tot = S.txns.filter(t=>inCycle(t,r) && !jarOf(t.jar).save).reduce((s,t)=>s+t.amt,0);
-    cycles.push({lb:"T"+(r.s.getMonth()+1), tot, cur:i===0});
-  }
-  const max = Math.max(...cycles.map(m=>m.tot), 1);
-  const chart = `<div class="card"><div class="tiny mb">Tổng chi 6 kỳ gần nhất</div>
-    <div style="display:flex;align-items:flex-end;gap:8px;height:120px">
-    ${cycles.map(m=>`<div style="flex:1;text-align:center">
-      <div class="tiny" style="margin-bottom:3px">${m.tot?fmtShort(m.tot):""}</div>
-      <div style="height:${Math.max(4,m.tot/max*84)}px;background:${m.cur?'var(--accent)':'var(--line)'};border-radius:6px 6px 0 0"></div>
-      <div class="tiny" style="margin-top:4px">${m.lb}</div>
-    </div>`).join("")}</div></div>`;
-  return `<div class="screen"><h1>Báo cáo — ${cycleLabel(c.r).toLowerCase()}</h1>
-    <div class="mt"></div>${chart}
-    <h2>Theo hũ và khoản chi</h2>${jarsHtml}
+  return `<div class="screen"><h1>Báo cáo</h1>
+    <div class="card mt mb"><div class="tiny">Số dư</div>
+    <div style="font-size:26px;font-weight:800" class="${total<0?'neg':'pos'}">${fmt(total)}</div></div>
+    ${chart}
+    <h2>Danh mục — ${cycleLabel(c.r)}</h2>${jarsHtml}
     <div class="tiny center mt">Ngân sách chi tiêu: ${fmt(c.spendBudget)} · Đã chi: ${fmt(c.spentSpend)}</div>
   </div>`;
 }
@@ -603,7 +843,15 @@ function vSettings(){
       <input type="number" id="payday" min="1" max="28" value="${S.payday||1}"></div>
     </div>
     <p class="tiny mt">Chu kỳ ngân sách tính từ ngày nhận lương đến trước kỳ lương sau. Chọn 1 nếu muốn tính theo tháng dương lịch.</p>
-    <h2>Hũ ngân sách <span style="color:${tot===100?'var(--ok)':'var(--bad)'}">(tổng ${tot}%)</span></h2>
+    <h2>Tài khoản</h2>
+    ${S.accounts.map((a,i)=>`<div class="srow">
+      <input class="ic" value="${esc(a.icon)}" onchange="S.accounts[${i}].icon=this.value">
+      <input class="nm" value="${esc(a.name)}" onchange="S.accounts[${i}].name=this.value">
+      <input type="tel" style="width:110px" value="${a.init}" title="Số dư ban đầu" onchange="S.accounts[${i}].init=Number(this.value.replace(/\\D/g,''))||0">
+      <button onclick="delAcc(${i})" style="color:var(--ink3)">✕</button>
+    </div>`).join("")}
+    <p class="tiny">Ô thứ ba là số dư ban đầu của tài khoản.</p>
+    <h2>Hũ ngân sách <span style="color:${tot===100?'var(--green)':'var(--red)'}">(tổng ${tot}%)</span></h2>
     ${S.jars.map((j,i)=>`<div class="srow">
       <input class="ic" value="${j.icon}" onchange="S.jars[${i}].icon=this.value">
       <input class="nm" value="${esc(j.name)}" onchange="S.jars[${i}].name=this.value">
@@ -613,23 +861,36 @@ function vSettings(){
     </div>`).join("")}
     <button class="btn btn-ghost" onclick="addJar()">+ Thêm hũ</button>
     <h2>Khoản chi cụ thể trong từng hũ</h2>
-    <p class="tiny mb">Cách nhau bằng dấu phẩy — hiện ra khi chọn hũ lúc nhập giao dịch.</p>
+    <p class="tiny mb">Cách nhau bằng dấu phẩy — hiện ra khi chọn danh mục lúc nhập giao dịch.</p>
     ${S.jars.map((j,i)=>`<div class="mb">
       <div class="tiny" style="margin-bottom:4px">${j.icon} ${esc(j.name)}</div>
       <input type="text" value="${esc((j.cats||[]).join(", "))}" onchange="setCats(${i},this.value)">
     </div>`).join("")}
+    <div class="mb">
+      <div class="tiny" style="margin-bottom:4px">💵 Nguồn thu nhập</div>
+      <input type="text" value="${esc((S.incats||[]).join(", "))}" onchange="setInCats(this.value)">
+    </div>
     <div class="mt"></div>
     <button class="btn" onclick="saveSettings()">Lưu thay đổi</button>
     <h2>Dữ liệu</h2>
     <button class="btn btn-ghost mb" onclick="exportData()">⬇ Xuất dữ liệu (JSON)</button>
     <label class="btn btn-ghost mb" style="display:block">⬆ Nhập dữ liệu<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
-    <button class="btn btn-ghost" style="color:var(--bad)" onclick="resetAll()">Xóa toàn bộ dữ liệu</button>
+    <button class="btn btn-ghost" style="color:var(--red)" onclick="resetAll()">Xóa toàn bộ dữ liệu</button>
     <p class="tiny center mt">Dữ liệu lưu trên máy của bạn, không gửi đi đâu.<br>Mẹo: Thêm vào màn hình chính để dùng như app.</p>
   </div>`;
 }
 function setCats(i,v){
   const cats = v.split(",").map(s=>s.trim()).filter(Boolean);
   S.jars[i].cats = cats.length ? cats : ["Khác"];
+}
+function setInCats(v){
+  const cats = v.split(",").map(s=>s.trim()).filter(Boolean);
+  S.incats = cats.length ? cats : ["Khác"];
+}
+function delAcc(i){
+  if(S.accounts.length<=1){ toast("Phải có ít nhất 1 tài khoản"); return; }
+  if(!confirm("Xóa tài khoản \""+S.accounts[i].name+"\"? Giao dịch cũ vẫn giữ trong lịch sử.")) return;
+  S.accounts.splice(i,1); save(); render();
 }
 function saveSettings(){
   const inc = Number(document.getElementById("inc").value.replace(/\D/g,""));
@@ -700,7 +961,7 @@ function vOnboard(){
   const tot = ob.jars.reduce((s,j)=>s+Number(j.pct||0),0);
   return `<div class="ob">
     <h1>Tinh chỉnh định mức</h1>
-    <p class="muted mb">Kéo % theo thực tế của bạn — tổng nên bằng 100%. Hiện tại: <b style="color:${tot===100?'var(--ok)':'var(--bad)'}">${tot}%</b></p>
+    <p class="muted mb">Kéo % theo thực tế của bạn — tổng nên bằng 100%. Hiện tại: <b style="color:${tot===100?'var(--green)':'var(--red)'}">${tot}%</b></p>
     ${ob.jars.map((j,i)=>`<div class="srow">
       <span style="font-size:20px">${j.icon}</span>
       <span class="grow" style="font-size:14px">${esc(j.name)}<br><span class="tiny">${fmt(inc*j.pct/100)}/tháng</span></span>
