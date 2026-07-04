@@ -99,6 +99,12 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .srow input.pct{width:64px;text-align:center;padding:10px 6px}
 .srow input.nm{flex:1}
 .srow input.ic{width:52px;text-align:center;padding:10px 4px}
+.thumb{width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}
+.imgview{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.imgview img{max-width:92vw;max-height:78vh;border-radius:12px}
+.attachprev{position:relative;display:inline-block;margin-bottom:14px}
+.attachprev img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.attachprev button{position:absolute;top:-8px;right:-8px;background:var(--ink);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;line-height:1}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;white-space:nowrap}
 .toast.show{opacity:1}
 .center{text-align:center}
@@ -150,6 +156,26 @@ function load(){
   return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[]};
 }
 function save(){ localStorage.setItem(LS, JSON.stringify(S)); }
+
+/* ảnh hóa đơn lưu IndexedDB (localStorage không đủ chỗ) */
+function idbOpen(){ return new Promise((res,rej)=>{ const q=indexedDB.open("chitieu_img",1); q.onupgradeneeded=()=>q.result.createObjectStore("img"); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
+function imgPut(id,data){ return idbOpen().then(db=>new Promise((res,rej)=>{ const t=db.transaction("img","readwrite"); t.objectStore("img").put(data,id); t.oncomplete=res; t.onerror=()=>rej(t.error); })); }
+function imgGet(id){ return idbOpen().then(db=>new Promise(res=>{ const q=db.transaction("img").objectStore("img").get(id); q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); })).catch(()=>null); }
+function imgDel(id){ return idbOpen().then(db=>{ db.transaction("img","readwrite").objectStore("img").delete(id); }).catch(()=>{}); }
+function imgAll(){ return idbOpen().then(db=>new Promise(res=>{ const st=db.transaction("img").objectStore("img"); const out={}; const q=st.openCursor(); q.onsuccess=()=>{ const c=q.result; if(c){ out[c.key]=c.value; c.continue(); } else res(out); }; q.onerror=()=>res({}); })).catch(()=>({})); }
+function loadImgs(){
+  document.querySelectorAll("img[data-img]").forEach(el=>{
+    imgGet(el.dataset.img).then(d=>{ if(d) el.src=d; });
+  });
+}
+function viewImg(id){
+  imgGet(id).then(d=>{
+    if(!d){ toast("Không tìm thấy ảnh"); return; }
+    const o=document.createElement("div"); o.className="imgview"; o.onclick=()=>o.remove();
+    o.innerHTML=`<img src="${d}" alt="hóa đơn"><div class="tiny" style="color:#fff">Chạm để đóng</div>`;
+    document.body.appendChild(o);
+  });
+}
 
 const fmt = n => Math.round(n).toLocaleString("vi-VN") + "₫";
 const fmtShort = n => n >= 1e6 ? (Math.round(n/1e5)/10).toLocaleString("vi-VN") + " tr" : Math.round(n/1e3).toLocaleString("vi-VN") + "k";
@@ -220,6 +246,7 @@ function render(){
   else if(view==="fixed") body = vFixed();
   app.innerHTML = body + vNav();
   if(view==="add" && add.step===2){ const n=document.getElementById("note"); if(n) n.value = add.note; }
+  loadImgs();
 }
 
 function vNav(){
@@ -233,7 +260,7 @@ function vNav(){
   </nav>`;
 }
 function go(v){ view = v; render(); }
-function goAdd(){ add = {step:1, amt:"", jar:null, cat:null, note:""}; view="add"; render(); }
+function goAdd(){ add = {step:1, amt:"", jar:null, cat:null, note:"", img:null}; view="add"; render(); }
 const sec = (title, v) => `<h2 class="row"><span class="grow">${title}</span><button class="mng" onclick="go('${v}')">Quản lý ›</button></h2>`;
 
 /* ---------- home ---------- */
@@ -296,6 +323,7 @@ function vHome(){
     ${debtsHtml}
     <h2>Hũ ngân sách</h2>
     ${jarsHtml}
+    ${S.txns.length ? sec("Gần đây","history") + [...S.txns].sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).slice(0,3).map(txRow).join("") : ""}
   </div>`;
 }
 function payFixed(id){
@@ -335,6 +363,9 @@ function vAdd(){
         <div class="r ${r<0?'neg':''}">còn ${fmtShort(r)}</div></button>`;
     }).join("")}</div>
     ${chips}
+    ${add.img
+      ? `<div class="attachprev"><img src="${add.img}" alt="hóa đơn"><button onclick="add.img=null;keepNote();render()" aria-label="Bỏ ảnh">✕</button></div>`
+      : `<label class="btn btn-ghost mb" style="display:block">📷 Chụp / đính kèm hóa đơn<input type="file" accept="image/*" capture="environment" style="display:none" onchange="attachImg(this)"></label>`}
     <input type="text" id="note" placeholder="Ghi chú (vd: ăn sáng, xăng xe...)" oninput="add.note=this.value">
     <div class="mt"></div>
     <button class="btn" onclick="saveTx()" ${add.jar?"":"disabled"}>Lưu giao dịch</button>
@@ -352,9 +383,26 @@ function addNext(){ add.step=2; render(); }
 function keepNote(){ const n=document.getElementById("note"); if(n) add.note=n.value; }
 function pickJar(id){ keepNote(); add.jar=id; add.cat=null; render(); }
 function pickCat(i){ keepNote(); const j=jarOf(add.jar); add.cat = (add.cat===j.cats[i]) ? null : j.cats[i]; render(); }
+function attachImg(inp){
+  const f = inp.files[0]; if(!f) return;
+  const img = new Image();
+  img.onload = ()=>{
+    const mx = 900, sc = Math.min(1, mx/Math.max(img.width,img.height));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(img.width*sc); cv.height = Math.round(img.height*sc);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    add.img = cv.toDataURL("image/jpeg",0.72);
+    URL.revokeObjectURL(img.src);
+    keepNote(); render();
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(img.src); toast("Không đọc được ảnh"); };
+  img.src = URL.createObjectURL(f);
+}
 function saveTx(){
   keepNote();
-  S.txns.push({id:Date.now()+"", amt:Number(add.amt), jar:add.jar, cat:add.cat||"Khác", note:add.note.trim(), d:todayStr()});
+  const tid = Date.now()+"";
+  S.txns.push({id:tid, amt:Number(add.amt), jar:add.jar, cat:add.cat||"Khác", note:add.note.trim(), d:todayStr(), hasImg:!!add.img});
+  if(add.img) imgPut(tid, add.img);
   save();
   const j = jarOf(add.jar);
   const bud = S.income*j.pct/100;
@@ -365,29 +413,53 @@ function saveTx(){
 }
 
 /* ---------- history ---------- */
-function vHistory(){
+let hq = "";
+function txRow(t){
+  const j = jarOf(t.jar);
+  const sub = esc(j.name)+(t.cat&&t.cat!=="Khác"?" · "+esc(t.cat):"");
+  const lead = t.hasImg
+    ? `<img class="thumb" data-img="${t.id}" onclick="viewImg('${t.id}')" alt="hóa đơn" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">`
+    : `<span class="ico">${j.icon}</span>`;
+  return `<div class="tx">
+    ${lead}
+    <div class="grow"><div class="n">${esc(t.note)||esc(t.cat||j.name)}</div><div class="s">${sub}</div></div>
+    <span class="a">−${fmt(t.amt)}</span>
+    <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
+  </div>`;
+}
+function hList(){
+  const q = hq.trim().toLowerCase();
+  const match = t => {
+    if(!q) return true;
+    const j = jarOf(t.jar);
+    return (t.note||"").toLowerCase().includes(q) || j.name.toLowerCase().includes(q)
+      || (t.cat||"").toLowerCase().includes(q) || String(t.amt).includes(q.replace(/\D/g,"")||"~");
+  };
   const groups = {};
-  [...S.txns].sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).forEach(t=>{
+  [...S.txns].filter(match).sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).forEach(t=>{
     (groups[t.d]=groups[t.d]||[]).push(t);
   });
   const days = Object.keys(groups);
-  const body = days.length ? days.map(d=>{
+  return days.length ? days.map(d=>{
     const list = groups[d];
     const tot = list.reduce((s,t)=>s+t.amt,0);
     const [y,m,dd] = d.split("-");
     return `<div class="day"><div class="dh"><span>${dd}/${m}/${y}${d===todayStr()?" · hôm nay":""}</span><span>${fmt(tot)}</span></div>
-      ${list.map(t=>{ const j=jarOf(t.jar); const sub = esc(j.name)+(t.cat&&t.cat!=="Khác"?" · "+esc(t.cat):""); return `<div class="tx">
-        <span class="ico">${j.icon}</span>
-        <div class="grow"><div class="n">${esc(t.note)||esc(t.cat||j.name)}</div><div class="s">${sub}</div></div>
-        <span class="a">−${fmt(t.amt)}</span>
-        <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
-      </div>`;}).join("")}</div>`;
-  }).join("") : `<div class="center muted" style="padding:60px 0">Chưa có giao dịch nào.<br>Bấm nút + để ghi khoản chi đầu tiên.</div>`;
-  return `<div class="screen"><h1>Lịch sử</h1><div class="mt"></div>${body}</div>`;
+      ${list.map(txRow).join("")}</div>`;
+  }).join("") : `<div class="center muted" style="padding:60px 0">${q ? "Không tìm thấy giao dịch nào." : "Chưa có giao dịch nào.<br>Bấm nút + để ghi khoản chi đầu tiên."}</div>`;
+}
+function vHistory(){
+  return `<div class="screen"><h1>Lịch sử</h1>
+    <div class="mt"></div>
+    <input type="text" placeholder="🔍 Tìm theo ghi chú, hũ, khoản chi, số tiền..." value="${esc(hq)}"
+      oninput="hq=this.value;document.getElementById('hlist').innerHTML=hList();loadImgs()">
+    <div class="mt"></div>
+    <div id="hlist">${hList()}</div>
+  </div>`;
 }
 function delTx(id){
   if(!confirm("Xóa giao dịch này?")) return;
-  S.txns = S.txns.filter(t=>t.id!==id); save(); render(); toast("Đã xóa");
+  S.txns = S.txns.filter(t=>t.id!==id); imgDel(id); save(); render(); toast("Đã xóa");
 }
 
 /* ---------- debts ---------- */
@@ -570,14 +642,26 @@ function saveSettings(){
 function addJar(){ S.jars.push({id:"j"+Date.now(), name:"Hũ mới", icon:"🫙", pct:0, save:false, cats:["Khác"]}); render(); }
 function delJar(i){ if(confirm("Xóa hũ \""+S.jars[i].name+"\"? Giao dịch cũ của hũ vẫn giữ trong lịch sử.")){ S.jars.splice(i,1); save(); render(); } }
 function exportData(){
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));
-  a.download = "chitieu-backup-"+todayStr()+".json"; a.click();
+  imgAll().then(imgs=>{
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify({...S, _images:imgs},null,2)],{type:"application/json"}));
+    a.download = "chitieu-backup-"+todayStr()+".json"; a.click();
+  });
 }
 function importData(inp){
   const f = inp.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = ()=>{ try{ const d=JSON.parse(r.result); if(d.jars&&d.txns){ localStorage.setItem(LS, JSON.stringify(d)); S=load(); render(); toast("Đã nhập dữ liệu ✓"); } else toast("File không hợp lệ"); }catch(e){ toast("File không hợp lệ"); } };
+  r.onload = ()=>{
+    try{
+      const d = JSON.parse(r.result);
+      if(!(d.jars && d.txns)){ toast("File không hợp lệ"); return; }
+      const imgs = d._images || {}; delete d._images;
+      localStorage.setItem(LS, JSON.stringify(d));
+      Promise.all(Object.keys(imgs).map(k=>imgPut(k, imgs[k]))).finally(()=>{
+        S = load(); render(); toast("Đã nhập dữ liệu ✓");
+      });
+    }catch(e){ toast("File không hợp lệ"); }
+  };
   r.readAsText(f);
 }
 function resetAll(){ if(confirm("Xóa TOÀN BỘ dữ liệu? Không thể hoàn tác.")){ localStorage.removeItem(LS); S=load(); ob={step:1,income:"",payday:"1",fw:null,jars:[]}; view="home"; render(); } }
