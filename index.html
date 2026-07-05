@@ -33,8 +33,11 @@ button{font:inherit;border:none;background:none;cursor:pointer;color:inherit}
 .btn{display:block;width:100%;padding:15px;border-radius:var(--r);background:var(--blue);color:#fff;font-size:16px;font-weight:600;text-align:center}
 .btn:disabled{opacity:.35}
 .btn-ghost{background:var(--card);color:var(--ink)}
-input[type=text],input[type=tel],input[type=number],input[type=date],select{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);-webkit-appearance:none;color-scheme:dark}
+input[type=text],input[type=tel],input[type=number],input[type=date],select,textarea{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);-webkit-appearance:none;appearance:none;color-scheme:dark;-webkit-text-fill-color:var(--ink)}
 input:focus,select:focus{outline:2px solid var(--blue);outline-offset:-1px}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--card2) inset;-webkit-text-fill-color:var(--ink);caret-color:var(--ink)}
+select option{background:var(--card2);color:var(--ink)}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .mng{font-size:12px;color:var(--blue);font-weight:600;padding:4px 0 4px 10px;white-space:nowrap}
 .back{font-size:22px;padding:0 10px 2px 0;color:var(--ink2)}
 .pos{color:var(--green)}.neg{color:var(--red)}
@@ -103,12 +106,11 @@ input:focus,select:focus{outline:2px solid var(--blue);outline-offset:-1px}
 .bar{height:7px;background:var(--card2);border-radius:4px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:4px}
 .catline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-top:7px}
-/* nav */
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(27,27,34,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink3);padding:4px 10px;min-width:56px}
-.nav button.on{color:var(--blue);font-weight:600}
-.nav .ic{font-size:21px;line-height:1}
-.nav .fab{width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;margin-top:-24px;box-shadow:0 4px 14px rgba(79,142,247,.4)}
+/* nav — floating pill kiểu CapMoney */
+.nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:rgba(24,24,30,.97);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:99px;display:flex;justify-content:space-around;align-items:center;padding:7px;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:40}
+.nav button{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--ink3);transition:background .15s}
+.nav button.on{background:var(--card2);color:var(--blue)}
+.fab2{position:fixed;right:20px;bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(79,142,247,.45);z-index:41}
 /* add flow */
 .photostep{flex:1;display:flex;flex-direction:column;padding:18px 16px 30px}
 .photostep .opts{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px}
@@ -236,7 +238,7 @@ function defCats(name){
 let S = load();
 let view = "home";
 let mode = "cycle", off = 0, rptN = 6;
-let soTab = "acc";
+let soTab = "acc", debtDir = "owe";
 let dayMode = "day", accF = "all", calOff = 0, selDay = null;
 let sheet = null, hq = "";
 let add = null;
@@ -259,10 +261,12 @@ function load(){
       if(d.name===undefined) d.name = "";
       if(d.hide===undefined) d.hide = false;
       if(!d.budgets) d.budgets = [];
+      if(!d.wishes) d.wishes = [];
+      d.debts.forEach(x=>{ if(!x.dir) x.dir = "owe"; });
       return d;
     }
   }catch(e){}
-  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[], name:"", hide:false, budgets:[],
+  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[], name:"", hide:false, budgets:[], wishes:[],
     accounts:[{id:"a1",name:"Ví tiền mặt",icon:"👛",init:0},{id:"a2",name:"Ngân hàng",icon:"🏦",init:0}],
     incats:["Lương","Thưởng","Kinh doanh","Khác"]};
 }
@@ -421,17 +425,21 @@ function render(){
   else if(view==="tf") body = vTransfer();
   else if(view==="addacc") body = vAddAcc();
   else if(view==="budgets") body = vBudgets();
-  app.innerHTML = body + (view==="add" ? "" : vNav()) + vSheet();
+  else if(view==="dayview") body = vDayView();
+  const fab = (view==="home"||view==="dayview") ? `<button class="fab2" onclick="goAdd(${view==='dayview'?'selDay':''})" aria-label="Thêm giao dịch">+</button>` : "";
+  app.innerHTML = body + (view==="add" ? "" : vNav()+fab) + vSheet();
   if(view==="add" && add && add.step==="entry"){ const n=document.getElementById("note"); if(n) n.value = add.note; }
   loadImgs();
 }
 function vNav(){
-  const it = (v,ic,lb) => `<button class="${view===v?'on':''}" onclick="go('${v}')"><span class="ic">${ic}</span>${lb}</button>`;
+  const grp = {home:"home", dayview:"home", history:"home", stats:"stats", so:"so", tf:"so", addacc:"so", budgets:"budgets", settings:"settings"};
+  const cur = grp[view] || view;
+  const it = (v,ic,lb) => `<button class="${cur===v?'on':''}" onclick="go('${v}')" aria-label="${lb}">${ic}</button>`;
   return `<nav class="nav">
     ${it("home","⌂","Tổng quan")}
     ${it("stats","◔","Báo cáo")}
-    <button class="fab" onclick="goAdd()" aria-label="Thêm giao dịch">+</button>
     ${it("so","▤","Sổ")}
+    ${it("budgets","▦","Ngân sách")}
     ${it("settings","⚙","Cài đặt")}
   </nav>`;
 }
@@ -489,12 +497,8 @@ function vHome(){
     const dot = list.length ? `<span class="dot" style="background:${hasEx?'var(--red)':hasIn?'var(--green)':'var(--blue)'}"></span>` : "";
     const inner = list.length ? `${img}<span class="dnum">${d}</span>${dot}`
       : (ds<=today ? `<span class="plus">+</span><span class="dnum tiny" style="position:absolute;bottom:3px">${d}</span>` : `<span class="dnum">${d}</span>`);
-    cells += `<button class="cday ${selDay===ds?'sel':''} ${ds===today?'today':''}" onclick="selDay='${ds}';render()">${inner}</button>`;
+    cells += `<button class="cday ${ds===today?'today':''}" onclick="openDay('${ds}')">${inner}</button>`;
   }
-  const dayList = (byDay[selDay]||[]).sort((a,b)=>b.id.localeCompare(a.id));
-  const dayEx = dayList.filter(t=>t.type==="ex"||!t.type).reduce((s,t)=>s+t.amt,0);
-  const dayIn = dayList.filter(t=>t.type==="in").reduce((s,t)=>s+t.amt,0);
-  const [sy,sm,sd] = selDay.split("-");
 
   return `<div class="screen">
     <div class="row greet">
@@ -531,10 +535,6 @@ function vHome(){
       <div class="chead"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
       <div class="cgrid">${cells}</div>
     </div>
-    <h2 class="row"><span class="grow">Ngày ${sd}/${sm}/${sy}${selDay===today?" · hôm nay":""}
-      ${dayEx?` <span class="neg" style="font-size:13px">↗ ${mask(dayEx)}</span>`:""}${dayIn?` <span class="pos" style="font-size:13px">↙ ${mask(dayIn)}</span>`:""}</span>
-      <button class="mng" onclick="goAdd('${selDay}')">+ Ghi cho ngày này</button></h2>
-    ${dayList.length ? `<div class="dgrid">${dayList.map(dayCard).join("")}</div>` : `<p class="tiny">Không có giao dịch nào trong ngày này.</p>`}
     ${sec("Ngân sách","budgets")}
     ${S.budgets.length ? S.budgets.slice(0,3).map(b=>budBar(b)).join("") : `<p class="tiny">Tạo ngân sách theo ngày/tuần/tháng, có cộng dồn giữa các đợt.</p>`}
     <h2>Hũ ngân sách kỳ này</h2>
@@ -556,12 +556,14 @@ function vHome(){
 function vSo(){
   const tabs = `<div class="ptabs">
     <button class="${soTab==='acc'?'on':''}" onclick="soTab='acc';render()">💳 Tài khoản</button>
-    <button class="${soTab==='debt'?'on':''}" onclick="soTab='debt';render()">💵 Khoản vay</button>
+    <button class="${soTab==='debt'?'on':''}" onclick="soTab='debt';render()">💵 Vay nợ</button>
     <button class="${soTab==='fixed'?'on':''}" onclick="soTab='fixed';render()">📌 Cố định</button>
+    <button class="${soTab==='wish'?'on':''}" onclick="soTab='wish';render()">🎁 Wishlist</button>
   </div>`;
   let inner = "";
   if(soTab==="acc") inner = soAcc();
   else if(soTab==="debt") inner = soDebt();
+  else if(soTab==="wish") inner = soWish();
   else inner = soFixed();
   return `<div class="screen">${tabs}${inner}</div>`;
 }
@@ -605,33 +607,105 @@ function soAcc(){
     <p class="tiny">Hũ tiết kiệm của bạn nằm ở màn hình Tổng quan — đóng vai trò sổ tiết kiệm theo kỳ.</p>`;
 }
 function soDebt(){
-  const unpaid = S.debts.filter(d=>!d.paid);
-  const paid = S.debts.filter(d=>d.paid);
-  const total = unpaid.reduce((s,d)=>s+d.amount,0);
   const today = todayStr();
   const row = d => {
+    const lend = d.dir==="lend";
     const overdue = !d.paid && d.due && d.due < today;
     return `<div class="tx ${d.paid?'done':''}">
-      <span class="ico">🔖</span>
+      <span class="ico">${lend?"🤝":"🔖"}</span>
       <div class="grow"><div class="n">${esc(d.name)}</div>
-      <div class="s ${overdue?'neg':''}">${d.paid ? "Đã trả "+(d.paidDate?d.paidDate.slice(8,10)+"/"+d.paidDate.slice(5,7):"") : d.due ? (overdue?"Quá hạn ":"Hạn ")+d.due.slice(8,10)+"/"+d.due.slice(5,7)+"/"+d.due.slice(0,4) : "Chưa có hạn"}</div></div>
-      <span class="a">${fmt(d.amount)}</span>
+      <div class="s ${overdue?'neg':''}">${d.paid ? (lend?"Đã thu hồi ":"Đã trả ")+(d.paidDate?d.paidDate.slice(8,10)+"/"+d.paidDate.slice(5,7):"") : d.due ? (overdue?"Quá hạn ":"Hạn ")+d.due.slice(8,10)+"/"+d.due.slice(5,7)+"/"+d.due.slice(0,4) : "Chưa có hạn"}</div></div>
+      <span class="a ${lend?'pos':''}">${lend?"+":""}${fmt(d.amount)}</span>
       ${d.paid?"":`<button class="paybtn" onclick="payDebt('${d.id}')">✓</button>`}
       <button class="del" onclick="delDebt('${d.id}')" aria-label="Xóa">✕</button>
     </div>`;
   };
+  const owe = S.debts.filter(d=>!d.paid && d.dir!=="lend");
+  const lend = S.debts.filter(d=>!d.paid && d.dir==="lend");
+  const paid = S.debts.filter(d=>d.paid);
+  const oweTot = owe.reduce((s,d)=>s+d.amount,0);
+  const lendTot = lend.reduce((s,d)=>s+d.amount,0);
   return `
     <div class="card">
-      <div class="tiny mb">Thêm khoản nợ / khoản cần thanh toán</div>
-      <input type="text" id="dname" placeholder="Nợ ai / khoản gì (vd: trả góp điện thoại)" class="mb">
+      <div class="ptabs" style="margin-bottom:12px">
+        <button class="${debtDir==='owe'?'on':''}" onclick="debtDir='owe';keepDform();render()">🔖 Mình nợ</button>
+        <button class="${debtDir==='lend'?'on':''}" onclick="debtDir='lend';keepDform();render()">🤝 Cho vay</button>
+      </div>
+      <input type="text" id="dname" placeholder="${debtDir==='lend'?'Ai nợ mình / khoản gì (vd: Nam mượn)':'Nợ ai / khoản gì (vd: trả góp điện thoại)'}" class="mb">
       <input type="tel" id="damt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb">
-      <div class="tiny" style="margin-bottom:4px">Hạn trả (không bắt buộc)</div>
+      <div class="tiny" style="margin-bottom:4px">${debtDir==='lend'?'Hạn thu hồi':'Hạn trả'} (không bắt buộc)</div>
       <input type="date" id="ddue" class="mb">
-      <button class="btn" onclick="addDebt()">Thêm khoản nợ</button>
+      <button class="btn" onclick="addDebt()">${debtDir==='lend'?'Thêm khoản cho vay':'Thêm khoản nợ'}</button>
     </div>
-    <h2>Đang nợ${total?` — tổng <span class="neg">${fmt(total)}</span>`:""}</h2>
-    ${unpaid.length ? unpaid.map(row).join("") : `<p class="tiny">Không có khoản nợ nào. Tuyệt!</p>`}
-    ${paid.length ? `<h2>Đã trả xong</h2>`+paid.map(row).join("") : ""}`;
+    <h2>Nợ phải trả${oweTot?` — <span class="neg">${fmt(oweTot)}</span>`:""}</h2>
+    ${owe.length ? owe.map(row).join("") : `<p class="tiny">Không có khoản nợ nào. Tuyệt!</p>`}
+    <h2>Nợ chưa thu hồi${lendTot?` — <span class="pos">${fmt(lendTot)}</span>`:""}</h2>
+    ${lend.length ? lend.map(row).join("") : `<p class="tiny">Không ai nợ bạn cả.</p>`}
+    ${paid.length ? `<h2>Đã xong</h2>`+paid.map(row).join("") : ""}`;
+}
+function keepDform(){
+  const n=document.getElementById("dname"), a=document.getElementById("damt"), u=document.getElementById("ddue");
+  const v = {n:n?n.value:"", a:a?a.value:"", u:u?u.value:""};
+  setTimeout(()=>{
+    const n2=document.getElementById("dname"), a2=document.getElementById("damt"), u2=document.getElementById("ddue");
+    if(n2) n2.value=v.n; if(a2) a2.value=v.a; if(u2) u2.value=v.u;
+  },0);
+}
+function soWish(){
+  const rows = S.wishes.map(w=>{
+    const saved = w.saved||0;
+    const p = w.price>0 ? saved/w.price*100 : 0;
+    const doneW = saved >= w.price;
+    return `<div class="jar">
+      <div class="top"><span class="nm">${esc(w.icon||"🎁")} ${esc(w.name)}${doneW?' <span class="pos tiny">Đủ tiền 🎉</span>':''}</span>
+      <span style="color:${doneW?'var(--green)':'var(--ink2)'}">${S.hide?"•••":fmtShort(saved)} / ${fmtShort(w.price)} <span class="tiny">(${Math.min(999,Math.round(p))}%)</span></span></div>
+      <div class="bar"><i style="width:${Math.min(100,p)}%;background:${doneW?'var(--green)':'var(--blue)'}"></i></div>
+      <div class="catline" style="margin-top:8px"><span></span><span>
+        <button class="paybtn" onclick="wishContribute('${w.id}')">+ Góp tiền</button>
+        <button class="del" onclick="delWish('${w.id}')" aria-label="Xóa">✕</button></span></div>
+    </div>`;
+  }).join("");
+  const totalNeed = S.wishes.filter(w=>(w.saved||0)<w.price).reduce((s,w)=>s+w.price-(w.saved||0),0);
+  return `
+    <p class="muted mb">Những món bạn muốn mua — đặt mục tiêu, góp dần và theo dõi tiến độ.</p>
+    <div class="card">
+      <div class="tiny mb">Thêm mong muốn</div>
+      <div class="row mb">
+        <div style="width:80px"><div class="tiny" style="margin-bottom:4px">Icon</div>
+        <input type="text" id="wicon" value="🎁" style="text-align:center"></div>
+        <div class="grow"><div class="tiny" style="margin-bottom:4px">Tên món đồ</div>
+        <input type="text" id="wname" placeholder="VD: iPhone 17, xe máy..."></div>
+      </div>
+      <input type="tel" id="wprice" inputmode="numeric" placeholder="Giá mục tiêu (VNĐ)" class="mb">
+      <input type="tel" id="wsaved" inputmode="numeric" placeholder="Đã để dành (VNĐ, không bắt buộc)" class="mb">
+      <button class="btn" onclick="addWish()">Thêm vào wishlist</button>
+    </div>
+    <h2>Danh sách${totalNeed?` — còn thiếu <b>${fmt(totalNeed)}</b>`:""}</h2>
+    ${rows || `<div class="card center"><div style="font-size:34px;opacity:.5">🎁</div><div style="font-weight:700;margin:8px 0 4px">Wishlist trống</div><p class="tiny">Thêm món đồ bạn mơ ước để bắt đầu tích góp</p></div>`}`;
+}
+function addWish(){
+  const name = document.getElementById("wname").value.trim();
+  const icon = document.getElementById("wicon").value.trim() || "🎁";
+  const price = Number(document.getElementById("wprice").value.replace(/\D/g,""));
+  const saved = Number(document.getElementById("wsaved").value.replace(/\D/g,"")) || 0;
+  if(!name){ toast("Nhập tên món đồ"); return; }
+  if(!price){ toast("Nhập giá mục tiêu"); return; }
+  S.wishes.push({id:"w"+Date.now(), name, icon, price, saved});
+  save(); render(); toast("Đã thêm vào wishlist ✓");
+}
+function wishContribute(id){
+  const w = S.wishes.find(x=>x.id===id); if(!w) return;
+  const v = prompt("Góp thêm bao nhiêu cho \""+w.name+"\"? (VNĐ)");
+  if(v===null) return;
+  const n = Number(String(v).replace(/\D/g,""));
+  if(!n){ toast("Số tiền không hợp lệ"); return; }
+  w.saved = (w.saved||0) + n;
+  save(); render();
+  toast(w.saved>=w.price ? "🎉 Đã đủ tiền mua "+w.name+"!" : "Đã góp "+fmt(n)+" ✓");
+}
+function delWish(id){
+  if(!confirm("Xóa món này khỏi wishlist?")) return;
+  S.wishes = S.wishes.filter(w=>w.id!==id); save(); render(); toast("Đã xóa");
 }
 function soFixed(){
   const c = calc();
@@ -671,6 +745,32 @@ function soFixed(){
     <h2>Danh sách${total?` — tổng <b>${fmt(total)}</b>/tháng`:""}</h2>
     ${rows || `<p class="tiny">Chưa có chi phí cố định nào.</p>`}`;
 }
+function openDay(ds){
+  selDay = ds;
+  const has = S.txns.some(t=>t.d===ds && accMatch(t));
+  if(has){ view="dayview"; render(); }
+  else goAdd(ds);
+}
+function vDayView(){
+  const [y,m,d] = selDay.split("-").map(Number);
+  const dt = new Date(y, m-1, d);
+  const wd = ["Chủ Nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"][dt.getDay()];
+  const list = S.txns.filter(t=>t.d===selDay && accMatch(t)).sort((a,b)=>b.id.localeCompare(a.id));
+  const ex = list.filter(t=>t.type==="ex"||!t.type).reduce((s,t)=>s+t.amt,0);
+  const inn = list.filter(t=>t.type==="in").reduce((s,t)=>s+t.amt,0);
+  return `<div class="screen">
+    <div class="row mb">
+      <button class="iconbtn" onclick="go('home')" aria-label="Đóng">✕</button>
+      <div class="grow center" style="font-weight:700">${wd}, ngày ${d} thg ${m}, ${y}</div>
+      <div style="width:38px"></div>
+    </div>
+    <div class="center mb">
+      ${ex?`<span class="neg" style="font-weight:800">↗ ${mask(ex)}</span>`:""}
+      ${inn?`<span class="pos" style="font-weight:800;margin-left:14px">↙ ${mask(inn)}</span>`:""}
+    </div>
+    ${list.length ? `<div class="dgrid">${list.map(dayCard).join("")}</div>` : `<p class="tiny center" style="padding:40px 0">Chưa có giao dịch trong ngày này.</p>`}
+  </div>`;
+}
 function dayCard(t){
   const isIn = t.type==="in", isTf = t.type==="tf";
   const j = (isIn||isTf) ? null : jarOf(t.jar);
@@ -706,9 +806,10 @@ function payFixed(id){
 }
 function payDebt(id){
   const d = S.debts.find(x=>x.id===id); if(!d) return;
-  if(!confirm("Đánh dấu đã trả \""+d.name+"\" ("+fmt(d.amount)+")?\nLưu ý: không tự ghi vào chi tiêu — nếu trả từ ngân sách kỳ này, hãy thêm giao dịch riêng.")) return;
+  const lend = d.dir==="lend";
+  if(!confirm((lend?"Đánh dấu đã thu hồi \"":"Đánh dấu đã trả \"")+d.name+"\" ("+fmt(d.amount)+")?\nLưu ý: không tự ghi vào sổ giao dịch — nếu cần, hãy thêm giao dịch "+(lend?"thu":"chi")+" riêng.")) return;
   d.paid = true; d.paidDate = todayStr();
-  save(); render(); toast("Đã trả xong ✓");
+  save(); render(); toast(lend?"Đã thu hồi ✓":"Đã trả xong ✓");
 }
 function addDebt(){
   const name = document.getElementById("dname").value.trim();
@@ -716,7 +817,7 @@ function addDebt(){
   const due = document.getElementById("ddue").value || null;
   if(!name){ toast("Nhập tên khoản nợ"); return; }
   if(!amt){ toast("Nhập số tiền"); return; }
-  S.debts.push({id:"d"+Date.now(), name, amount:amt, due, paid:false});
+  S.debts.push({id:"d"+Date.now(), name, amount:amt, due, paid:false, dir:debtDir});
   save(); render(); toast("Đã thêm ✓");
 }
 function delDebt(id){
@@ -940,7 +1041,7 @@ function vBudgets(){
   if(!bform) bform = {cycle:"month", roll:false, type:"total", jar:S.jars[0]?S.jars[0].id:null};
   const list = S.budgets.map(b=>budBar(b, true)).join("");
   return `<div class="screen">
-    <h1 class="row"><button class="back" onclick="go('home')">‹</button>Quản lý ngân sách</h1>
+    <h1>Quản lý ngân sách</h1>
     <p class="muted" style="margin-top:4px">Tạo và theo dõi nhiều ngân sách</p>
     <div class="card mt">
       <div class="tiny mb">Thêm ngân sách</div>
