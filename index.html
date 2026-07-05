@@ -21,7 +21,7 @@
 html{font-size:16px}
 body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
 #app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
-.screen{flex:1;padding:18px 16px 96px;overflow-y:auto}
+.screen{flex:1;padding:calc(14px + env(safe-area-inset-top)) 16px 140px;overflow-y:auto}
 h1{font-size:20px;font-weight:700}
 h2{font-size:15px;font-weight:600;color:var(--ink);margin:22px 0 10px}
 .muted{color:var(--ink2);font-size:13px}
@@ -33,7 +33,7 @@ button{font:inherit;border:none;background:none;cursor:pointer;color:inherit}
 .btn{display:block;width:100%;padding:15px;border-radius:var(--r);background:var(--blue);color:#fff;font-size:16px;font-weight:600;text-align:center}
 .btn:disabled{opacity:.35}
 .btn-ghost{background:var(--card);color:var(--ink)}
-input[type=text],input[type=tel],input[type=number],input[type=date],select,textarea{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);-webkit-appearance:none;appearance:none;color-scheme:dark;-webkit-text-fill-color:var(--ink)}
+input:not([type=file]):not([type=checkbox]):not([type=radio]),select,textarea{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);-webkit-appearance:none;appearance:none;color-scheme:dark;-webkit-text-fill-color:var(--ink)}
 input:focus,select:focus{outline:2px solid var(--blue);outline-offset:-1px}
 input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--card2) inset;-webkit-text-fill-color:var(--ink);caret-color:var(--ink)}
 select option{background:var(--card2);color:var(--ink)}
@@ -112,7 +112,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .nav button.on{background:var(--card2);color:var(--blue)}
 .fab2{position:fixed;right:20px;bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(79,142,247,.45);z-index:41}
 /* add flow */
-.photostep{flex:1;display:flex;flex-direction:column;padding:18px 16px 30px}
+.photostep{flex:1;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 16px 30px}
 .photostep .opts{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px}
 .bigopt{display:block;background:var(--card);border-radius:20px;padding:22px;text-align:center;font-size:17px;font-weight:700}
 .bigopt.cam{background:var(--blue);color:#fff}
@@ -168,7 +168,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .cmp .bi{width:12px;border-radius:4px 4px 0 0;background:var(--green)}
 .cmp .be{width:12px;border-radius:4px 4px 0 0;background:var(--red)}
 /* onboarding + settings */
-.ob{padding:34px 22px 24px;flex:1;display:flex;flex-direction:column}
+.ob{padding:calc(30px + env(safe-area-inset-top)) 22px 24px;flex:1;display:flex;flex-direction:column}
 .ob h1{font-size:24px;margin-bottom:6px}
 .fw{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:11px;text-align:left;width:100%}
 .fw.sel{border-color:var(--blue);background:var(--blue-bg)}
@@ -1220,15 +1220,17 @@ function vStats(){
 function vSettings(){
   const tot = S.jars.reduce((s,j)=>s+Number(j.pct||0),0);
   return `<div class="screen"><h1>Cài đặt</h1>
-    <h2>Tên của bạn</h2>
-    <input type="text" id="uname" value="${esc(S.name)}" placeholder="Hiện trên lời chào màn hình chính">
-    <div class="row" style="align-items:flex-start">
-      <div class="grow"><h2>Thu nhập hàng tháng</h2>
-      <input type="tel" id="inc" value="${S.income}" inputmode="numeric"></div>
-      <div style="width:120px"><h2>Ngày nhận lương</h2>
-      <input type="number" id="payday" min="1" max="28" value="${S.payday||1}"></div>
+    <div class="card mt mb">
+      <div class="tiny" style="margin-bottom:4px">Tên của bạn</div>
+      <input type="text" id="uname" value="${esc(S.name)}" placeholder="Hiện trên lời chào màn hình chính" class="mb">
+      <div class="row" style="align-items:flex-end">
+        <div class="grow"><div class="tiny" style="margin-bottom:4px">Thu nhập hàng tháng</div>
+        <input type="tel" id="inc" value="${S.income}" inputmode="numeric"></div>
+        <div style="width:110px"><div class="tiny" style="margin-bottom:4px">Ngày nhận lương</div>
+        <input type="number" id="payday" min="1" max="28" value="${S.payday||1}" style="text-align:center"></div>
+      </div>
+      <p class="tiny mt" style="margin-bottom:0">Chu kỳ ngân sách tính từ ngày nhận lương đến trước kỳ lương sau. Chọn 1 nếu muốn tính theo tháng dương lịch.</p>
     </div>
-    <p class="tiny mt">Chu kỳ ngân sách tính từ ngày nhận lương đến trước kỳ lương sau. Chọn 1 nếu muốn tính theo tháng dương lịch.</p>
     <h2>Tài khoản</h2>
     ${S.accounts.map((a,i)=>`<div class="srow">
       <input class="ic" value="${esc(a.icon)}" onchange="S.accounts[${i}].icon=this.value">
