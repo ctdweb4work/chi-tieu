@@ -177,9 +177,13 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .fw .badge{display:inline-block;font-size:11px;font-weight:700;background:var(--blue);color:#fff;padding:2px 9px;border-radius:99px;margin-left:8px;vertical-align:2px}
 .fw .d{font-size:13px;color:var(--ink2);margin-top:3px}
 .srow{display:flex;align-items:center;gap:8px;margin-bottom:9px}
-.srow input.pct{width:64px;text-align:center;padding:10px 6px}
-.srow input.nm{flex:1}
-.srow input.ic{width:52px;text-align:center;padding:10px 4px}
+.srow input{min-width:0}
+.srow input.pct{flex:0 0 64px;text-align:center;padding:10px 6px}
+.srow input.nm{flex:1 1 0}
+.srow input.ic{flex:0 0 52px;text-align:center;padding:10px 4px}
+.jcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:9px}
+.jcard .srow{margin-bottom:8px}
+.jcard .srow:last-child{margin-bottom:0}
 /* calendar photos + day grid */
 .cday{overflow:hidden}
 .cday img.cimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;border-radius:50%}
@@ -1360,12 +1364,17 @@ function vSettings(){
     </div>`).join("")}
     <p class="tiny">Ô thứ ba là số dư ban đầu của tài khoản.</p>
     <h2>Hũ ngân sách <span style="color:${tot===100?'var(--green)':'var(--red)'}">(tổng ${tot}%)</span></h2>
-    ${S.jars.map((j,i)=>`<div class="srow">
-      <input class="ic" value="${j.icon}" onchange="S.jars[${i}].icon=this.value">
-      <input class="nm" value="${esc(j.name)}" onchange="S.jars[${i}].name=this.value">
-      <input class="pct" type="number" value="${j.pct}" onchange="S.jars[${i}].pct=Number(this.value)||0">
-      <button onclick="S.jars[${i}].save=!S.jars[${i}].save;render()" title="Đánh dấu hũ tiết kiệm" style="font-size:18px;opacity:${j.save?1:.25}">💰</button>
-      <button onclick="delJar(${i})" style="color:var(--ink3)">✕</button>
+    ${S.jars.map((j,i)=>`<div class="jcard">
+      <div class="srow">
+        <input class="ic" value="${j.icon}" onchange="S.jars[${i}].icon=this.value" aria-label="Icon hũ">
+        <input class="nm" value="${esc(j.name)}" onchange="S.jars[${i}].name=this.value" placeholder="Tên hũ">
+      </div>
+      <div class="srow">
+        <input class="pct" type="number" value="${j.pct}" onchange="S.jars[${i}].pct=Number(this.value)||0" aria-label="Phần trăm"><span class="tiny">% thu nhập</span>
+        <span class="grow"></span>
+        <button class="pill" style="padding:7px 12px;font-size:13px;opacity:${j.save?1:.5}" onclick="S.jars[${i}].save=!S.jars[${i}].save;render()">💰 Tiết kiệm${j.save?" ✓":""}</button>
+        <button onclick="delJar(${i})" style="color:var(--ink3);padding:6px">✕</button>
+      </div>
     </div>`).join("")}
     <button class="btn btn-ghost" onclick="addJar()">+ Thêm hũ</button>
     <h2>Khoản chi cụ thể trong từng hũ</h2>
