@@ -304,6 +304,17 @@ function viewImg(id){
 }
 
 const fmt = n => Math.round(n).toLocaleString("vi-VN") + "₫";
+const fmtIn = n => n ? Number(n).toLocaleString("vi-VN") : "";
+document.addEventListener("input", e => {
+  const el = e.target;
+  if(!(el instanceof HTMLInputElement) || el.getAttribute("inputmode") !== "numeric") return;
+  const digitsBefore = el.value.slice(0, el.selectionStart).replace(/\D/g,"").length;
+  const digits = el.value.replace(/\D/g,"").slice(0,12);
+  el.value = digits ? Number(digits).toLocaleString("vi-VN") : "";
+  let i = 0, c = 0;
+  while(i < el.value.length && c < digitsBefore){ if(/\d/.test(el.value[i])) c++; i++; }
+  el.setSelectionRange(i, i);
+});
 const mask = n => S.hide ? "••••••" : fmt(n);
 const fmtShort = n => Math.abs(n) >= 1e6 ? (Math.round(n/1e5)/10).toLocaleString("vi-VN") + " tr" : Math.round(n/1e3).toLocaleString("vi-VN") + "k";
 const pad2 = n => String(n).padStart(2,"0");
@@ -1225,7 +1236,7 @@ function vSettings(){
       <input type="text" id="uname" value="${esc(S.name)}" placeholder="Hiện trên lời chào màn hình chính" class="mb">
       <div class="row" style="align-items:flex-end">
         <div class="grow"><div class="tiny" style="margin-bottom:4px">Thu nhập hàng tháng</div>
-        <input type="tel" id="inc" value="${S.income}" inputmode="numeric"></div>
+        <input type="tel" id="inc" value="${fmtIn(S.income)}" inputmode="numeric"></div>
         <div style="width:110px"><div class="tiny" style="margin-bottom:4px">Ngày nhận lương</div>
         <input type="number" id="payday" min="1" max="28" value="${S.payday||1}" style="text-align:center"></div>
       </div>
@@ -1325,7 +1336,7 @@ function vOnboard(){
       <h2>Tên của bạn?</h2>
       <input type="text" id="obname" placeholder="Ví dụ: Trí" value="">
       <h2>Thu nhập trung bình mỗi tháng?</h2>
-      <input type="tel" id="obinc" inputmode="numeric" placeholder="Ví dụ: 15000000" value="${ob.income}">
+      <input type="tel" id="obinc" inputmode="numeric" placeholder="Ví dụ: 15.000.000" value="${fmtIn(ob.income)}">
       <h2>Ngày nhận lương hàng tháng?</h2>
       <input type="number" id="obpd" min="1" max="28" value="${ob.payday}">
       <p class="tiny mt">Chu kỳ ngân sách tính từ ngày nhận lương. Để 1 nếu muốn tính theo tháng dương lịch.</p>
