@@ -14,8 +14,27 @@
 :root{
   --bg:#101014; --card:#1b1b22; --card2:#26262f; --ink:#f2f2f5; --ink2:#9d9da8; --ink3:#63636e;
   --line:#2b2b34; --blue:#4f8ef7; --blue-bg:#1c2a44; --green:#34c77b; --green-bg:#15311f;
-  --red:#ff6b6b; --red-bg:#3a1c1c; --amber:#f5b942; --accent:#4f8ef7;
+  --red:#ff6b6b; --red-bg:#3a1c1c; --amber:#f5b942; --amber-bg:#332a12; --accent:#4f8ef7;
+  --navbg:rgba(24,24,30,.97); --shadow:rgba(0,0,0,.45); --photobg:linear-gradient(160deg,#23232c,#17171d);
+  --povinput:rgba(38,38,47,.8); --toastbg:#f2f2f5; --toastink:#111; --dateinv:invert(.7); --fabsh:rgba(79,142,247,.45);
   --r:16px;
+  color-scheme:dark;
+}
+html[data-theme=light]{
+  --bg:#f4f5f7; --card:#ffffff; --card2:#eceef2; --ink:#191921; --ink2:#5f6470; --ink3:#9599a4;
+  --line:#e2e4ea; --blue:#3576e8; --blue-bg:#e3ecfd; --green:#1e9e5f; --green-bg:#dcf3e6;
+  --red:#e5484d; --red-bg:#fbe0e0; --amber:#c8890f; --amber-bg:#fdf0d5; --accent:#3576e8;
+  --navbg:rgba(255,255,255,.97); --shadow:rgba(25,25,45,.14); --photobg:linear-gradient(160deg,#e8eaef,#f6f7fa);
+  --povinput:rgba(255,255,255,.85); --toastbg:#22222a; --toastink:#fff; --dateinv:none; --fabsh:rgba(53,118,232,.4);
+  color-scheme:light;
+}
+html[data-theme=berry]{
+  --bg:#fff4f6; --card:#ffffff; --card2:#ffe7ee; --ink:#33141d; --ink2:#8f5f6c; --ink3:#c299a5;
+  --line:#f6d5df; --blue:#e0356b; --blue-bg:#fcdce7; --green:#1e9e5f; --green-bg:#dcf3e6;
+  --red:#e5484d; --red-bg:#fbe0e0; --amber:#c8890f; --amber-bg:#fdf0d5; --accent:#e0356b;
+  --navbg:rgba(255,255,255,.97); --shadow:rgba(140,25,65,.16); --photobg:linear-gradient(160deg,#ffe2ea,#fff6f8);
+  --povinput:rgba(255,255,255,.85); --toastbg:#3b1420; --toastink:#fff; --dateinv:none; --fabsh:rgba(224,53,107,.4);
+  color-scheme:light;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font-size:16px}
@@ -33,11 +52,11 @@ button{font:inherit;border:none;background:none;cursor:pointer;color:inherit}
 .btn{display:block;width:100%;padding:15px;border-radius:var(--r);background:var(--blue);color:#fff;font-size:16px;font-weight:600;text-align:center}
 .btn:disabled{opacity:.35}
 .btn-ghost{background:var(--card);color:var(--ink)}
-input:not([type=file]):not([type=checkbox]):not([type=radio]),select,textarea{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);-webkit-appearance:none;appearance:none;color-scheme:dark;-webkit-text-fill-color:var(--ink)}
+input:not([type=file]):not([type=checkbox]):not([type=radio]),select,textarea{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--ink)}
 input:focus,select:focus{outline:2px solid var(--blue);outline-offset:-1px}
 input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--card2) inset;-webkit-text-fill-color:var(--ink);caret-color:var(--ink)}
 select option{background:var(--card2);color:var(--ink)}
-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
+input[type=date]::-webkit-calendar-picker-indicator{filter:var(--dateinv)}
 .mng{font-size:12px;color:var(--blue);font-weight:600;padding:4px 0 4px 10px;white-space:nowrap}
 .back{font-size:22px;padding:0 10px 2px 0;color:var(--ink2)}
 .pos{color:var(--green)}.neg{color:var(--red)}
@@ -49,7 +68,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .badge2{font-size:12px;font-weight:600;padding:5px 11px;border-radius:99px}
 .badge2.ok{background:var(--green-bg);color:var(--green)}
 .badge2.warn{background:var(--red-bg);color:var(--red)}
-.badge2.zap{background:#332a12;color:var(--amber)}
+.badge2.zap{background:var(--amber-bg);color:var(--amber)}
 /* pills & tabs */
 .ptabs{display:flex;background:var(--card);border-radius:99px;padding:4px;gap:4px;margin-bottom:12px}
 .ptabs button{flex:1;padding:9px 0;border-radius:99px;font-size:13px;font-weight:600;color:var(--ink2)}
@@ -107,10 +126,10 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .bar i{display:block;height:100%;border-radius:4px}
 .catline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-top:7px}
 /* nav — floating pill kiểu CapMoney */
-.nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:rgba(24,24,30,.97);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:99px;display:flex;justify-content:space-around;align-items:center;padding:7px;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:40}
+.nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:var(--navbg);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:99px;display:flex;justify-content:space-around;align-items:center;padding:7px;box-shadow:0 8px 24px var(--shadow);z-index:40}
 .nav button{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--ink3);transition:background .15s}
 .nav button.on{background:var(--card2);color:var(--blue)}
-.fab2{position:fixed;right:20px;bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(79,142,247,.45);z-index:41}
+.fab2{position:fixed;right:20px;bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px var(--fabsh);z-index:41}
 /* add flow */
 .photostep{flex:1;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 16px 30px}
 .photostep .opts{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px}
@@ -119,13 +138,13 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .skip{text-align:center;color:var(--ink2);font-size:15px;padding:14px}
 .pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:9px 16px;font-size:14px;font-weight:600;position:relative}
 .pill.sel{border-color:var(--blue);color:var(--blue)}
-.photo{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#23232c,#17171d);min-height:170px;margin-bottom:12px}
+.photo{position:relative;border-radius:24px;overflow:hidden;background:var(--photobg);min-height:170px;margin-bottom:12px}
 .photo img.bgimg{width:100%;max-height:280px;object-fit:cover;display:block}
 .pov{position:absolute;left:0;right:0;bottom:0;padding:14px;background:rgba(16,16,20,.55);backdrop-filter:blur(6px)}
 .photo.nophoto .pov{position:static;background:none;padding:26px 14px}
 .bigamt{font-size:36px;font-weight:800;text-align:center;letter-spacing:-.5px}
 .bigamt .d{font-size:20px;font-weight:600;color:var(--ink2)}
-.pov input{margin-top:10px;background:rgba(38,38,47,.8);border:none;text-align:center}
+.pov input{margin-top:10px;background:var(--povinput);border:none;text-align:center}
 .chipsrow{display:flex;justify-content:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .toggle{display:flex;background:var(--card);border-radius:99px;padding:4px;gap:4px}
 .toggle button{padding:8px 18px;border-radius:99px;font-size:14px;font-weight:700;color:var(--ink2)}
@@ -191,7 +210,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .cday.sel{outline:2.5px solid var(--blue);outline-offset:1px}
 .cday .plus{color:var(--ink3);font-size:15px}
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.dcard{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/5;background:linear-gradient(160deg,#23232c,#17171d);display:flex;align-items:center;justify-content:center}
+.dcard{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/5;background:var(--photobg);display:flex;align-items:center;justify-content:center}
 .dcard img.dimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .dcard .cb{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;z-index:1;background:var(--blue);color:#fff}
 .dcard .cb.in{background:var(--green);color:#08130c}
@@ -210,7 +229,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .tgl.on i{left:23px}
 .cnt{background:var(--card2);border-radius:99px;font-size:11px;padding:1px 7px;margin-left:5px}
 .ptabs .on .cnt{background:rgba(255,255,255,.25)}
-.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#f2f2f5;color:#111;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:300;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--toastbg);color:var(--toastink);padding:10px 20px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:300;white-space:nowrap}
 .toast.show{opacity:1}
 .center{text-align:center}
 .mt{margin-top:14px}.mb{margin-bottom:14px}
@@ -270,14 +289,27 @@ function load(){
       if(!d.budgets) d.budgets = [];
       if(!d.wishes) d.wishes = [];
       d.debts.forEach(x=>{ if(!x.dir) x.dir = "owe"; });
+      if(!d.theme) d.theme = "auto";
       return d;
     }
   }catch(e){}
-  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[], name:"", hide:false, budgets:[], wishes:[],
+  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[], name:"", hide:false, budgets:[], wishes:[], theme:"auto",
     accounts:[{id:"a1",name:"Ví tiền mặt",icon:"👛",init:0},{id:"a2",name:"Ngân hàng",icon:"🏦",init:0}],
     incats:["Lương","Thưởng","Kinh doanh","Khác"]};
 }
 function save(){ localStorage.setItem(LS, JSON.stringify(S)); }
+
+/* theme */
+const mqLight = matchMedia("(prefers-color-scheme: light)");
+function applyTheme(){
+  const t = (S && S.theme) || "auto";
+  const mode = t==="berry" ? "berry" : (mqLight.matches ? "light" : "dark");
+  document.documentElement.dataset.theme = mode;
+  const tc = {dark:"#101014", light:"#f4f5f7", berry:"#fff4f6"}[mode];
+  const m = document.querySelector('meta[name=theme-color]'); if(m) m.content = tc;
+}
+mqLight.addEventListener("change", ()=>{ if(((S&&S.theme)||"auto")==="auto") applyTheme(); });
+function setTheme(t){ S.theme = t; save(); applyTheme(); render(); toast(t==="berry" ? "🍓 Theme Dâu tây" : "Theme mặc định theo máy"); }
 
 /* ảnh hóa đơn — IndexedDB */
 function idbOpen(){ return new Promise((res,rej)=>{ const q=indexedDB.open("chitieu_img",1); q.onupgradeneeded=()=>q.result.createObjectStore("img"); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
@@ -523,7 +555,7 @@ function vHome(){
       <div class="grow"><div class="hi">${greeting()}</div><div class="nm">${esc(name)}</div></div>
       <button class="iconbtn" onclick="S.hide=!S.hide;save();render()" aria-label="Ẩn/hiện số tiền">${S.hide?"🙈":"👁️"}</button>
       <button class="iconbtn" onclick="go('history')" aria-label="Tìm kiếm">🔍</button>
-      <div class="ava">${esc(initials)}</div>
+      <div class="ava">${S.theme==="berry"?"🍓":esc(initials)}</div>
     </div>
     <div class="badges">
       ${todayEx===0 ? `<span class="badge2 ok">🌿 Hôm nay chưa chi tiêu</span>` : `<span class="badge2 warn">🛒 Đã chi ${mask(todayEx)} hôm nay</span>`}
@@ -1355,6 +1387,11 @@ function vSettings(){
       </div>
       <p class="tiny mt" style="margin-bottom:0">Chu kỳ ngân sách tính từ ngày nhận lương đến trước kỳ lương sau. Chọn 1 nếu muốn tính theo tháng dương lịch.</p>
     </div>
+    <h2>Giao diện</h2>
+    <div class="cygrid" style="margin-bottom:0">
+      <button class="${(S.theme||"auto")!=="berry"?"on":""}" onclick="setTheme('auto')" style="padding:14px 10px">🌗 Mặc định<br><span style="font-size:11px;opacity:.75">Theo máy: Sáng / Tối</span></button>
+      <button class="${S.theme==="berry"?"on":""}" onclick="setTheme('berry')" style="padding:14px 10px">🍓 Dâu tây<br><span style="font-size:11px;opacity:.75">Nền sáng, nhấn hồng</span></button>
+    </div>
     <h2>Tài khoản</h2>
     ${S.accounts.map((a,i)=>`<div class="srow">
       <input class="ic" value="${esc(a.icon)}" onchange="S.accounts[${i}].icon=this.value">
@@ -1511,6 +1548,7 @@ function obFinish(){
 
 function esc(s){ return String(s??"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 
+applyTheme();
 render();
 if("serviceWorker" in navigator && location.protocol!=="file:") navigator.serviceWorker.register("sw.js");
 </script>
