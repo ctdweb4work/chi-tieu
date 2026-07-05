@@ -152,6 +152,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .tx .s{font-size:12px;color:var(--ink3)}
 .tx .a{font-weight:700;font-size:14px;white-space:nowrap}
 .tx .del{color:var(--ink3);font-size:16px;padding:6px}
+.edt{color:var(--blue);font-size:14px;padding:6px}
 .tx.done .n,.tx.done .a{text-decoration:line-through;color:var(--ink3)}
 .paybtn{background:var(--blue-bg);color:var(--blue);font-size:13px;font-weight:700;padding:8px 14px;border-radius:99px}
 .thumb{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0}
@@ -193,6 +194,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 .dcard .amt{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-weight:800;font-size:15px;text-shadow:0 1px 4px rgba(0,0,0,.85);z-index:1;color:#fff}
 .dcard .bigico{font-size:34px;opacity:.85}
 .dcard .delx{position:absolute;top:6px;right:6px;z-index:2;background:rgba(0,0,0,.5);border-radius:50%;width:24px;height:24px;font-size:12px;color:#fff;display:flex;align-items:center;justify-content:center}
+.dcard .edx{position:absolute;top:6px;right:36px;z-index:2;background:rgba(0,0,0,.5);border-radius:50%;width:24px;height:24px;font-size:12px;color:#fff;display:flex;align-items:center;justify-content:center}
 /* budgets */
 .cygrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .cygrid button{background:var(--card2);border-radius:12px;padding:12px;font-size:14px;font-weight:600}
@@ -243,6 +245,7 @@ let dayMode = "day", accF = "all", calOff = 0, selDay = null;
 let sheet = null, hq = "";
 let add = null;
 let bform = null;
+let dEdit = null, fEdit = null, wEdit = null, bEdit = null, aEdit = null, tfEdit = null;
 let ob = {step:1, income:"", payday:"1", fw:null, jars:[]};
 
 function load(){
@@ -458,7 +461,7 @@ function go(v){
   if(v==="debts"){ view="so"; soTab="debt"; }
   else if(v==="fixed"){ view="so"; soTab="fixed"; }
   else view = v;
-  sheet=null; render();
+  sheet=null; dEdit=fEdit=wEdit=bEdit=aEdit=tfEdit=null; render();
 }
 function setMode(m){ mode=m; off=0; render(); }
 function goAdd(d){ add = {step:"photo", img:null, type:"ex", amt:"", acc:S.accounts[0]?S.accounts[0].id:null, jar:null, cat:null, note:"", d:d||todayStr()}; view="add"; render(); }
@@ -613,6 +616,7 @@ function soAcc(){
         <div class="ico" style="background:${ACC_COLORS[i%ACC_COLORS.length]}22;color:${ACC_COLORS[i%ACC_COLORS.length]}">${a.icon}</div>
         <div class="grow"><div class="n">${esc(a.name)}</div>
         <div class="b ${b<0?'neg':'pos'}">${mask(b)}</div></div>
+        <button class="edt" onclick="editAcc('${a.id}')" aria-label="Sửa">✎</button>
       </div>`;
     }).join("")}
     <p class="tiny">Hũ tiết kiệm của bạn nằm ở màn hình Tổng quan — đóng vai trò sổ tiết kiệm theo kỳ.</p>`;
@@ -628,6 +632,7 @@ function soDebt(){
       <div class="s ${overdue?'neg':''}">${d.paid ? (lend?"Đã thu hồi ":"Đã trả ")+(d.paidDate?d.paidDate.slice(8,10)+"/"+d.paidDate.slice(5,7):"") : d.due ? (overdue?"Quá hạn ":"Hạn ")+d.due.slice(8,10)+"/"+d.due.slice(5,7)+"/"+d.due.slice(0,4) : "Chưa có hạn"}</div></div>
       <span class="a ${lend?'pos':''}">${lend?"+":""}${fmt(d.amount)}</span>
       ${d.paid?"":`<button class="paybtn" onclick="payDebt('${d.id}')">✓</button>`}
+      ${d.paid?"":`<button class="edt" onclick="editDebt('${d.id}')" aria-label="Sửa">✎</button>`}
       <button class="del" onclick="delDebt('${d.id}')" aria-label="Xóa">✕</button>
     </div>`;
   };
@@ -642,11 +647,16 @@ function soDebt(){
         <button class="${debtDir==='owe'?'on':''}" onclick="debtDir='owe';keepDform();render()">🔖 Mình nợ</button>
         <button class="${debtDir==='lend'?'on':''}" onclick="debtDir='lend';keepDform();render()">🤝 Cho vay</button>
       </div>
-      <input type="text" id="dname" placeholder="${debtDir==='lend'?'Ai nợ mình / khoản gì (vd: Nam mượn)':'Nợ ai / khoản gì (vd: trả góp điện thoại)'}" class="mb">
-      <input type="tel" id="damt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb">
+      ${(()=>{ const ed = dEdit ? S.debts.find(x=>x.id===dEdit) : null; return `
+      ${ed?`<div class="tiny mb" style="color:var(--blue)">✎ Đang sửa "${esc(ed.name)}"</div>`:""}
+      <input type="text" id="dname" placeholder="${debtDir==='lend'?'Ai nợ mình / khoản gì (vd: Nam mượn)':'Nợ ai / khoản gì (vd: trả góp điện thoại)'}" class="mb" value="${ed?esc(ed.name):''}">
+      <input type="tel" id="damt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb" value="${ed?fmtIn(ed.amount):''}">
       <div class="tiny" style="margin-bottom:4px">${debtDir==='lend'?'Hạn thu hồi':'Hạn trả'} (không bắt buộc)</div>
-      <input type="date" id="ddue" class="mb">
-      <button class="btn" onclick="addDebt()">${debtDir==='lend'?'Thêm khoản cho vay':'Thêm khoản nợ'}</button>
+      <input type="date" id="ddue" class="mb" value="${ed&&ed.due?ed.due:''}">
+      <div class="row">
+        <button class="btn grow" onclick="addDebt()">${ed?'Cập nhật':debtDir==='lend'?'Thêm khoản cho vay':'Thêm khoản nợ'}</button>
+        ${ed?`<button class="pill" style="padding:13px 16px" onclick="dEdit=null;render()">Hủy</button>`:""}
+      </div>`;})()}
     </div>
     <h2>Nợ phải trả${oweTot?` — <span class="neg">${fmt(oweTot)}</span>`:""}</h2>
     ${owe.length ? owe.map(row).join("") : `<p class="tiny">Không có khoản nợ nào. Tuyệt!</p>`}
@@ -673,24 +683,29 @@ function soWish(){
       <div class="bar"><i style="width:${Math.min(100,p)}%;background:${doneW?'var(--green)':'var(--blue)'}"></i></div>
       <div class="catline" style="margin-top:8px"><span></span><span>
         <button class="paybtn" onclick="wishContribute('${w.id}')">+ Góp tiền</button>
+        <button class="edt" onclick="editWish('${w.id}')" aria-label="Sửa">✎</button>
         <button class="del" onclick="delWish('${w.id}')" aria-label="Xóa">✕</button></span></div>
     </div>`;
   }).join("");
   const totalNeed = S.wishes.filter(w=>(w.saved||0)<w.price).reduce((s,w)=>s+w.price-(w.saved||0),0);
   return `
     <p class="muted mb">Những món bạn muốn mua — đặt mục tiêu, góp dần và theo dõi tiến độ.</p>
+    ${(()=>{ const ed = wEdit ? S.wishes.find(x=>x.id===wEdit) : null; return `
     <div class="card">
-      <div class="tiny mb">Thêm mong muốn</div>
+      <div class="tiny mb">${ed?`<span style="color:var(--blue)">✎ Đang sửa "${esc(ed.name)}"</span>`:"Thêm mong muốn"}</div>
       <div class="row mb">
         <div style="width:80px"><div class="tiny" style="margin-bottom:4px">Icon</div>
-        <input type="text" id="wicon" value="🎁" style="text-align:center"></div>
+        <input type="text" id="wicon" value="${ed?esc(ed.icon||"🎁"):"🎁"}" style="text-align:center"></div>
         <div class="grow"><div class="tiny" style="margin-bottom:4px">Tên món đồ</div>
-        <input type="text" id="wname" placeholder="VD: iPhone 17, xe máy..."></div>
+        <input type="text" id="wname" placeholder="VD: iPhone 17, xe máy..." value="${ed?esc(ed.name):''}"></div>
       </div>
-      <input type="tel" id="wprice" inputmode="numeric" placeholder="Giá mục tiêu (VNĐ)" class="mb">
-      <input type="tel" id="wsaved" inputmode="numeric" placeholder="Đã để dành (VNĐ, không bắt buộc)" class="mb">
-      <button class="btn" onclick="addWish()">Thêm vào wishlist</button>
-    </div>
+      <input type="tel" id="wprice" inputmode="numeric" placeholder="Giá mục tiêu (VNĐ)" class="mb" value="${ed?fmtIn(ed.price):''}">
+      <input type="tel" id="wsaved" inputmode="numeric" placeholder="Đã để dành (VNĐ, không bắt buộc)" class="mb" value="${ed?fmtIn(ed.saved||0):''}">
+      <div class="row">
+        <button class="btn grow" onclick="addWish()">${ed?'Cập nhật':'Thêm vào wishlist'}</button>
+        ${ed?`<button class="pill" style="padding:13px 16px" onclick="wEdit=null;render()">Hủy</button>`:""}
+      </div>
+    </div>`;})()}
     <h2>Danh sách${totalNeed?` — còn thiếu <b>${fmt(totalNeed)}</b>`:""}</h2>
     ${rows || `<div class="card center"><div style="font-size:34px;opacity:.5">🎁</div><div style="font-weight:700;margin:8px 0 4px">Wishlist trống</div><p class="tiny">Thêm món đồ bạn mơ ước để bắt đầu tích góp</p></div>`}`;
 }
@@ -701,8 +716,18 @@ function addWish(){
   const saved = Number(document.getElementById("wsaved").value.replace(/\D/g,"")) || 0;
   if(!name){ toast("Nhập tên món đồ"); return; }
   if(!price){ toast("Nhập giá mục tiêu"); return; }
+  if(wEdit){
+    const w = S.wishes.find(x=>x.id===wEdit);
+    if(w){ w.name=name; w.icon=icon; w.price=price; w.saved=saved; }
+    wEdit = null; save(); render(); toast("Đã cập nhật ✓"); return;
+  }
   S.wishes.push({id:"w"+Date.now(), name, icon, price, saved});
   save(); render(); toast("Đã thêm vào wishlist ✓");
+}
+function editWish(id){
+  if(!S.wishes.some(x=>x.id===id)) return;
+  wEdit = id; render();
+  const el = document.getElementById("wname"); if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
 }
 function wishContribute(id){
   const w = S.wishes.find(x=>x.id===id); if(!w) return;
@@ -734,25 +759,30 @@ function soFixed(){
       <div class="s ${overdue?'neg':''}">${isPaid ? "Đã ghi kỳ này ✓" : (overdue?"Quá hạn ":"Đến hạn ")+pad2(due.getDate())+"/"+pad2(due.getMonth()+1)} · ${j.icon} ${esc(j.name)}</div></div>
       <span class="a">${fmt(f.amount)}</span>
       ${isPaid?"":`<button class="paybtn" onclick="payFixed('${f.id}')">Ghi</button>`}
+      <button class="edt" onclick="editFixed('${f.id}')" aria-label="Sửa">✎</button>
       <button class="del" onclick="delFixed('${f.id}')" aria-label="Xóa">✕</button>
     </div>`;
   }).join("");
   return `
     <p class="muted mb">Các khoản lặp lại hàng tháng. Đến hạn, bấm "Ghi" là tự động vào chi tiêu của hũ.</p>
+    ${(()=>{ const ed = fEdit ? S.fixed.find(x=>x.id===fEdit) : null; return `
     <div class="card">
-      <div class="tiny mb">Thêm chi phí cố định</div>
-      <input type="text" id="fname" placeholder="Tên (vd: tiền nhà, internet...)" class="mb">
-      <input type="tel" id="famt" inputmode="numeric" placeholder="Số tiền mỗi tháng (VNĐ)" class="mb">
+      <div class="tiny mb">${ed?`<span style="color:var(--blue)">✎ Đang sửa "${esc(ed.name)}"</span>`:"Thêm chi phí cố định"}</div>
+      <input type="text" id="fname" placeholder="Tên (vd: tiền nhà, internet...)" class="mb" value="${ed?esc(ed.name):''}">
+      <input type="tel" id="famt" inputmode="numeric" placeholder="Số tiền mỗi tháng (VNĐ)" class="mb" value="${ed?fmtIn(ed.amount):''}">
       <div class="row mb">
         <div class="grow"><div class="tiny" style="margin-bottom:4px">Ngày đến hạn (1–28)</div>
-        <input type="number" id="fday" min="1" max="28" value="1"></div>
+        <input type="number" id="fday" min="1" max="28" value="${ed?ed.day:1}"></div>
         <div class="grow"><div class="tiny" style="margin-bottom:4px">Trừ vào hũ</div>
-        <select id="fjar">${S.jars.map(j=>`<option value="${j.id}">${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>
+        <select id="fjar">${S.jars.map(j=>`<option value="${j.id}" ${ed&&ed.jar===j.id?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select></div>
       </div>
       <div class="tiny" style="margin-bottom:4px">Trừ từ tài khoản</div>
-      <select id="facc" class="mb">${S.accounts.map(a=>`<option value="${a.id}">${a.icon} ${esc(a.name)}</option>`).join("")}</select>
-      <button class="btn" onclick="addFixed()">Thêm chi phí cố định</button>
-    </div>
+      <select id="facc" class="mb">${S.accounts.map(a=>`<option value="${a.id}" ${ed&&ed.acc===a.id?"selected":""}>${a.icon} ${esc(a.name)}</option>`).join("")}</select>
+      <div class="row">
+        <button class="btn grow" onclick="addFixed()">${ed?'Cập nhật':'Thêm chi phí cố định'}</button>
+        ${ed?`<button class="pill" style="padding:13px 16px" onclick="fEdit=null;render()">Hủy</button>`:""}
+      </div>
+    </div>`;})()}
     <h2>Danh sách${total?` — tổng <b>${fmt(total)}</b>/tháng`:""}</h2>
     ${rows || `<p class="tiny">Chưa có chi phí cố định nào.</p>`}`;
 }
@@ -792,6 +822,7 @@ function dayCard(t){
   return `<div class="dcard" ${t.hasImg?`onclick="viewImg('${t.id}')"`:""}>
     ${media}
     <span class="cb ${isIn?'in':''}">${badge}</span>
+    <button class="edx" onclick="event.stopPropagation();editTxn('${t.id}')" aria-label="Sửa">✎</button>
     <button class="delx" onclick="event.stopPropagation();delTx('${t.id}')" aria-label="Xóa">✕</button>
     <span class="amt">${isTf?"":isIn?"+":"−"}${mask(t.amt)}</span>
   </div>`;
@@ -805,7 +836,7 @@ function budBar(b, withDel){
   const j = b.type==="cat" ? jarOf(b.jar) : null;
   return `<div class="jar">
     <div class="top"><span class="nm">${j?j.icon:"🌐"} ${esc(b.name)} <span class="tiny">· ${cycleName(b.cycle)}${b.rollover?" · cộng dồn":""}</span></span>
-    <span style="color:${p>=100?'var(--red)':p>=80?'var(--amber)':'var(--ink2)'}">${S.hide?"•••":fmtShort(spent)} / ${fmtShort(Math.max(0,eff))}${withDel?` <button class="del" style="padding:0 0 0 6px;font-size:13px" onclick="delBudget('${b.id}')" aria-label="Xóa">✕</button>`:""}</span></div>
+    <span style="color:${p>=100?'var(--red)':p>=80?'var(--amber)':'var(--ink2)'}">${S.hide?"•••":fmtShort(spent)} / ${fmtShort(Math.max(0,eff))}${withDel?` <button class="edt" style="padding:0 0 0 6px;font-size:13px" onclick="editBudget('${b.id}')" aria-label="Sửa">✎</button> <button class="del" style="padding:0 0 0 6px;font-size:13px" onclick="delBudget('${b.id}')" aria-label="Xóa">✕</button>`:""}</span></div>
     <div class="bar"><i style="width:${Math.min(100,Math.max(0,p))}%;background:${barColor(p)}"></i></div>
     ${b.rollover&&carry!==0?`<div class="catline"><span>Cộng dồn từ đợt trước</span><span class="${carry<0?'neg':'pos'}">${carry>0?"+":""}${S.hide?"•••":fmtShort(carry)}</span></div>`:""}
   </div>`;
@@ -828,8 +859,19 @@ function addDebt(){
   const due = document.getElementById("ddue").value || null;
   if(!name){ toast("Nhập tên khoản nợ"); return; }
   if(!amt){ toast("Nhập số tiền"); return; }
+  if(dEdit){
+    const d = S.debts.find(x=>x.id===dEdit);
+    if(d){ d.name=name; d.amount=amt; d.due=due; d.dir=debtDir; }
+    dEdit = null; save(); render(); toast("Đã cập nhật ✓"); return;
+  }
   S.debts.push({id:"d"+Date.now(), name, amount:amt, due, paid:false, dir:debtDir});
   save(); render(); toast("Đã thêm ✓");
+}
+function editDebt(id){
+  const d = S.debts.find(x=>x.id===id); if(!d) return;
+  dEdit = id; debtDir = d.dir==="lend" ? "lend" : "owe";
+  render();
+  const el = document.getElementById("dname"); if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
 }
 function delDebt(id){
   if(!confirm("Xóa khoản nợ này?")) return;
@@ -843,8 +885,18 @@ function addFixed(){
   const acc = document.getElementById("facc").value;
   if(!name){ toast("Nhập tên khoản chi"); return; }
   if(!amt){ toast("Nhập số tiền"); return; }
+  if(fEdit){
+    const f = S.fixed.find(x=>x.id===fEdit);
+    if(f){ f.name=name; f.amount=amt; f.day=day; f.jar=jar; f.acc=acc; }
+    fEdit = null; save(); render(); toast("Đã cập nhật ✓"); return;
+  }
   S.fixed.push({id:"f"+Date.now(), name, amount:amt, day, jar, acc});
   save(); render(); toast("Đã thêm ✓");
+}
+function editFixed(id){
+  if(!S.fixed.some(x=>x.id===id)) return;
+  fEdit = id; render();
+  const el = document.getElementById("fname"); if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
 }
 function delFixed(id){
   if(!confirm("Xóa chi phí cố định này? Giao dịch đã ghi vẫn giữ trong lịch sử.")) return;
@@ -872,7 +924,7 @@ function vAdd(){
   const dd = add.d===todayStr() ? "Hôm nay" : add.d.slice(8,10)+"/"+add.d.slice(5,7);
   const keys = ["1","2","3","4","5","6","7","8","9","000","0","⌫"];
   return `<div class="screen" style="padding-bottom:24px">
-    <div class="row mb"><button class="pill" onclick="go('home')">Hủy</button></div>
+    <div class="row mb"><button class="pill" onclick="go('home')">Hủy</button>${add.editId?'<span class="grow center" style="font-weight:700">Sửa giao dịch</span><span style="width:52px"></span>':''}</div>
     <div class="photo ${add.img?'':'nophoto'}">
       ${add.img?`<img class="bgimg" src="${add.img}" alt="hóa đơn">`:""}
       <div class="pov">
@@ -940,15 +992,21 @@ function attachImg(inp){
 function saveTx(){
   keepNote();
   const amt = Number(add.amt); if(!amt) return;
-  const tid = Date.now()+"";
+  const tid = add.editId || Date.now()+"";
   const t = {id:tid, type:add.type, amt, acc:add.acc, note:add.note.trim(), d:add.d||todayStr(), hasImg:!!add.img};
   if(add.type==="ex"){
     const sj = S.jars.filter(x=>!x.save)[0] || S.jars[0];
     t.jar = add.jar || (sj && sj.id);
     t.cat = add.cat || "Khác";
   } else t.cat = add.cat || "Khác";
-  S.txns.push(t);
-  if(add.img) imgPut(tid, add.img);
+  if(add.editId){
+    const i = S.txns.findIndex(x=>x.id===add.editId);
+    if(i>=0){ if(S.txns[i].fixedId) t.fixedId = S.txns[i].fixedId; S.txns[i] = t; }
+    if(add.img) imgPut(tid, add.img); else imgDel(tid);
+  } else {
+    S.txns.push(t);
+    if(add.img) imgPut(tid, add.img);
+  }
   save();
   let msg = "Đã lưu ✓";
   if(t.type==="ex" && t.jar){
@@ -1000,15 +1058,20 @@ function pickAcc(id){ add.acc=id; sheet=null; render(); }
 
 /* ---------- transfer & accounts ---------- */
 function vTransfer(){
+  const ed = tfEdit ? S.txns.find(x=>x.id===tfEdit) : null;
   return `<div class="screen">
-    <h1 class="row"><button class="back" onclick="go('so')">‹</button>Chuyển tiền</h1>
+    <h1 class="row"><button class="back" onclick="go('so')">‹</button>${ed?'Sửa chuyển tiền':'Chuyển tiền'}</h1>
     <div class="card mt">
+      ${ed?`<div class="tiny mb" style="color:var(--blue)">✎ Đang sửa giao dịch ngày ${ed.d.slice(8,10)}/${ed.d.slice(5,7)}</div>`:""}
       <div class="tiny" style="margin-bottom:4px">Từ tài khoản</div>
-      <select id="tfrom" class="mb">${S.accounts.map(a=>`<option value="${a.id}">${a.icon} ${esc(a.name)} (${fmt(accBal(a))})</option>`).join("")}</select>
+      <select id="tfrom" class="mb">${S.accounts.map(a=>`<option value="${a.id}" ${ed&&ed.acc===a.id?"selected":""}>${a.icon} ${esc(a.name)} (${fmt(accBal(a))})</option>`).join("")}</select>
       <div class="tiny" style="margin-bottom:4px">Đến tài khoản</div>
-      <select id="tto" class="mb">${S.accounts.map((a,i)=>`<option value="${a.id}" ${i===1?"selected":""}>${a.icon} ${esc(a.name)}</option>`).join("")}</select>
-      <input type="tel" id="tamt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb">
-      <button class="btn" onclick="doTransfer()">⇆ Chuyển tiền</button>
+      <select id="tto" class="mb">${S.accounts.map((a,i)=>`<option value="${a.id}" ${ed?(ed.accTo===a.id?"selected":""):(i===1?"selected":"")}>${a.icon} ${esc(a.name)}</option>`).join("")}</select>
+      <input type="tel" id="tamt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb" value="${ed?fmtIn(ed.amt):''}">
+      <div class="row">
+        <button class="btn grow" onclick="doTransfer()">${ed?'Cập nhật':'⇆ Chuyển tiền'}</button>
+        ${ed?`<button class="pill" style="padding:13px 16px" onclick="tfEdit=null;render()">Hủy</button>`:""}
+      </div>
     </div>
     <h2>Lịch sử chuyển tiền</h2>
     ${S.txns.filter(t=>t.type==="tf").sort((a,b)=>b.d.localeCompare(a.d)).slice(0,15).map(txRow).join("") || `<p class="tiny">Chưa có giao dịch chuyển tiền.</p>`}
@@ -1020,21 +1083,28 @@ function doTransfer(){
   const amt = Number(document.getElementById("tamt").value.replace(/\D/g,""));
   if(from===to){ toast("Hai tài khoản phải khác nhau"); return; }
   if(!amt){ toast("Nhập số tiền"); return; }
+  if(tfEdit){
+    const t = S.txns.find(x=>x.id===tfEdit);
+    if(t){ t.acc=from; t.accTo=to; t.amt=amt; }
+    save(); go("so"); toast("Đã cập nhật ✓"); return;
+  }
   S.txns.push({id:Date.now()+"", type:"tf", amt, acc:from, accTo:to, d:todayStr(), note:""});
   save(); go("so"); toast("Đã chuyển "+fmt(amt)+" ✓");
 }
 function vAddAcc(){
+  const ed = aEdit ? S.accounts.find(x=>x.id===aEdit) : null;
   return `<div class="screen">
-    <h1 class="row"><button class="back" onclick="go('so')">‹</button>Thêm tài khoản</h1>
+    <h1 class="row"><button class="back" onclick="go('so')">‹</button>${ed?'Sửa tài khoản':'Thêm tài khoản'}</h1>
     <div class="card mt">
-      <input type="text" id="aname" placeholder="Tên tài khoản (vd: Momo, TPBank...)" class="mb">
+      <input type="text" id="aname" placeholder="Tên tài khoản (vd: Momo, TPBank...)" class="mb" value="${ed?esc(ed.name):''}">
       <div class="row mb">
         <div style="width:90px"><div class="tiny" style="margin-bottom:4px">Icon</div>
-        <input type="text" id="aicon" value="💳" style="text-align:center"></div>
-        <div class="grow"><div class="tiny" style="margin-bottom:4px">Số dư hiện có</div>
-        <input type="tel" id="ainit" inputmode="numeric" placeholder="0"></div>
+        <input type="text" id="aicon" value="${ed?esc(ed.icon||"💳"):"💳"}" style="text-align:center"></div>
+        <div class="grow"><div class="tiny" style="margin-bottom:4px">${ed?'Số dư ban đầu':'Số dư hiện có'}</div>
+        <input type="tel" id="ainit" inputmode="numeric" placeholder="0" value="${ed?fmtIn(ed.init):''}"></div>
       </div>
-      <button class="btn" onclick="addAcc()">Thêm tài khoản</button>
+      ${ed?`<p class="tiny mb">Số dư ban đầu là số tiền lúc tạo tài khoản — số dư hiện tại sẽ tự tính lại theo các giao dịch.</p>`:""}
+      <button class="btn" onclick="addAcc()">${ed?'Cập nhật':'Thêm tài khoản'}</button>
     </div>
   </div>`;
 }
@@ -1043,8 +1113,17 @@ function addAcc(){
   const icon = document.getElementById("aicon").value.trim() || "💳";
   const init = Number(document.getElementById("ainit").value.replace(/\D/g,"")) || 0;
   if(!name){ toast("Nhập tên tài khoản"); return; }
+  if(aEdit){
+    const a = S.accounts.find(x=>x.id===aEdit);
+    if(a){ a.name=name; a.icon=icon; a.init=init; }
+    save(); go("so"); toast("Đã cập nhật ✓"); return;
+  }
   S.accounts.push({id:"a"+Date.now(), name, icon, init});
   save(); go("so"); toast("Đã thêm "+name+" ✓");
+}
+function editAcc(id){
+  if(!S.accounts.some(x=>x.id===id)) return;
+  aEdit = id; view = "addacc"; sheet = null; render();
 }
 
 /* ---------- budgets ---------- */
@@ -1055,11 +1134,11 @@ function vBudgets(){
     <h1>Quản lý ngân sách</h1>
     <p class="muted" style="margin-top:4px">Tạo và theo dõi nhiều ngân sách</p>
     <div class="card mt">
-      <div class="tiny mb">Thêm ngân sách</div>
+      <div class="tiny mb">${bEdit?`<span style="color:var(--blue)">✎ Đang sửa ngân sách</span>`:"Thêm ngân sách"}</div>
       <div class="tiny" style="margin-bottom:4px">Tên ngân sách</div>
-      <input type="text" id="bname" placeholder="VD: Chi tiêu hàng ngày" class="mb">
+      <input type="text" id="bname" placeholder="VD: Chi tiêu hàng ngày" class="mb" value="${esc(bform.name||'')}">
       <div class="tiny" style="margin-bottom:4px">Số tiền ngân sách</div>
-      <input type="tel" id="bamt" inputmode="numeric" placeholder="0" class="mb">
+      <input type="tel" id="bamt" inputmode="numeric" placeholder="0" class="mb" value="${esc(bform.amtStr||'')}">
       <div class="tiny" style="margin-bottom:6px">Chu kỳ</div>
       <div class="cygrid">${CYCLES.map(([k,lb])=>`<button class="${bform.cycle===k?'on':''}" onclick="bform.cycle='${k}';keepBform();render()">${lb}${k==='month'&&(S.payday||1)!==1?' (kỳ lương)':''}</button>`).join("")}</div>
       <div class="tglrow" onclick="bform.roll=!bform.roll;keepBform();render()">
@@ -1073,7 +1152,10 @@ function vBudgets(){
         <button class="${bform.type==='cat'?'on':''}" onclick="bform.type='cat';keepBform();render()">📁 Danh mục (hũ)</button>
       </div>
       ${bform.type==="cat" ? `<select id="bjar" class="mb" onchange="bform.jar=this.value">${S.jars.map(j=>`<option value="${j.id}" ${bform.jar===j.id?"selected":""}>${j.icon} ${esc(j.name)}</option>`).join("")}</select>` : ""}
-      <button class="btn" onclick="addBudget()">Thêm ngân sách</button>
+      <div class="row">
+        <button class="btn grow" onclick="addBudget()">${bEdit?'Cập nhật':'Thêm ngân sách'}</button>
+        ${bEdit?`<button class="pill" style="padding:13px 16px" onclick="bEdit=null;bform=null;render()">Hủy</button>`:""}
+      </div>
     </div>
     <h2>Danh sách</h2>
     ${list || `<div class="card center"><div style="font-size:34px;opacity:.5">💳</div><div style="font-weight:700;margin:8px 0 4px">Chưa có ngân sách</div><p class="tiny">Tạo ngân sách để theo dõi chi tiêu</p></div>`}
@@ -1093,9 +1175,22 @@ function addBudget(){
   const amt = Number(document.getElementById("bamt").value.replace(/\D/g,""));
   if(!name){ toast("Nhập tên ngân sách"); return; }
   if(!amt){ toast("Nhập số tiền ngân sách"); return; }
+  if(bEdit){
+    const b = S.budgets.find(x=>x.id===bEdit);
+    if(b){ b.name=name; b.amount=amt; b.cycle=bform.cycle; b.rollover=bform.roll;
+      b.type=bform.type; b.jar=bform.type==="cat"?bform.jar:null; }
+    bEdit = null; bform = null; save(); render(); toast("Đã cập nhật ✓"); return;
+  }
   S.budgets.push({id:"b"+Date.now(), name, amount:amt, cycle:bform.cycle, rollover:bform.roll,
     type:bform.type, jar:bform.type==="cat"?bform.jar:null, created:todayStr()});
   bform = null; save(); render(); toast("Đã tạo ngân sách ✓");
+}
+function editBudget(id){
+  const b = S.budgets.find(x=>x.id===id); if(!b) return;
+  bEdit = id;
+  bform = {cycle:b.cycle, roll:!!b.rollover, type:b.type, jar:b.jar||(S.jars[0]&&S.jars[0].id), name:b.name, amtStr:fmtIn(b.amount)};
+  render();
+  const el = document.getElementById("bname"); if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
 }
 function delBudget(id){
   if(!confirm("Xóa ngân sách này?")) return;
@@ -1109,6 +1204,7 @@ function txRow(t){
       <span class="ico">⇆</span>
       <div class="grow"><div class="n">${esc(accOf(t.acc).name)} → ${esc(accOf(t.accTo).name)}</div><div class="s">Chuyển tiền · ${t.d.slice(8,10)}/${t.d.slice(5,7)}</div></div>
       <span class="a">${mask(t.amt)}</span>
+      <button class="edt" onclick="editTxn('${t.id}')" aria-label="Sửa">✎</button>
       <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
     </div>`;
   }
@@ -1123,6 +1219,7 @@ function txRow(t){
     ${lead}
     <div class="grow"><div class="n">${esc(t.note)||esc(t.cat|| (isIn?"Thu nhập":j.name))}</div><div class="s">${sub}</div></div>
     <span class="a ${isIn?'pos':''}">${isIn?"+":"−"}${mask(t.amt)}</span>
+    <button class="edt" onclick="editTxn('${t.id}')" aria-label="Sửa">✎</button>
     <button class="del" onclick="delTx('${t.id}')" aria-label="Xóa">✕</button>
   </div>`;
 }
@@ -1161,6 +1258,18 @@ function vHistory(){
 function delTx(id){
   if(!confirm("Xóa giao dịch này?")) return;
   S.txns = S.txns.filter(t=>t.id!==id); imgDel(id); save(); render(); toast("Đã xóa");
+}
+function editTxn(id){
+  const t = S.txns.find(x=>x.id===id); if(!t) return;
+  if(t.type==="tf"){
+    tfEdit = t.id; view = "tf"; sheet = null; render();
+    return;
+  }
+  add = {step:"entry", editId:t.id, img:null, type:t.type||"ex", amt:String(t.amt), acc:t.acc, jar:t.jar||null, cat:t.cat||null, note:t.note||"", d:t.d};
+  view = "add"; sheet = null; render();
+  if(t.hasImg) imgGet(t.id).then(img=>{
+    if(img && add && add.editId===t.id && view==="add"){ keepNote(); add.img=img; render(); }
+  });
 }
 
 /* ---------- stats ---------- */
