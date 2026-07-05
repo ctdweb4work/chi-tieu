@@ -268,7 +268,7 @@ let dayMode = "day", accF = "all", calOff = 0, selDay = null;
 let sheet = null, hq = "";
 let add = null;
 let bform = null;
-let dEdit = null, fEdit = null, wEdit = null, bEdit = null, aEdit = null, tfEdit = null;
+let dEdit = null, fEdit = null, wEdit = null, bEdit = null, aEdit = null, tfEdit = null, iEdit = null;
 let ob = {step:1, income:"", payday:"1", fw:null, jars:[]};
 
 function load(){
@@ -290,10 +290,11 @@ function load(){
       if(!d.wishes) d.wishes = [];
       d.debts.forEach(x=>{ if(!x.dir) x.dir = "owe"; });
       if(!d.theme) d.theme = "auto";
+      if(!d.installs) d.installs = [];
       return d;
     }
   }catch(e){}
-  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[], name:"", hide:false, budgets:[], wishes:[], theme:"auto",
+  return {setup:false, income:0, payday:1, jars:[], txns:[], debts:[], fixed:[], name:"", hide:false, budgets:[], wishes:[], theme:"auto", installs:[],
     accounts:[{id:"a1",name:"Ví tiền mặt",icon:"👛",init:0},{id:"a2",name:"Ngân hàng",icon:"🏦",init:0}],
     incats:["Lương","Thưởng","Kinh doanh","Khác"]};
 }
@@ -497,7 +498,7 @@ function go(v){
   if(v==="debts"){ view="so"; soTab="debt"; }
   else if(v==="fixed"){ view="so"; soTab="fixed"; }
   else view = v;
-  sheet=null; dEdit=fEdit=wEdit=bEdit=aEdit=tfEdit=null; render();
+  sheet=null; dEdit=fEdit=wEdit=bEdit=aEdit=tfEdit=iEdit=null; render();
 }
 function setMode(m){ mode=m; off=0; render(); }
 function goAdd(d){ add = {step:"photo", img:null, type:"ex", amt:"", acc:S.accounts[0]?S.accounts[0].id:null, jar:null, cat:null, note:"", d:d||todayStr()}; view="add"; render(); }
@@ -677,15 +678,56 @@ function soDebt(){
   const paid = S.debts.filter(d=>d.paid);
   const oweTot = owe.reduce((s,d)=>s+d.amount,0);
   const lendTot = lend.reduce((s,d)=>s+d.amount,0);
+  /* nợ trả góp */
+  const curM = today.slice(0,7);
+  const insts = S.installs || [];
+  const activeI = insts.filter(x=>x.paid<x.months).sort((a,b)=>a.day-b.day);
+  const doneI = insts.filter(x=>x.paid>=x.months);
+  const monTot = activeI.reduce((s,x)=>s+instCur(x),0);
+  const remTot = activeI.reduce((s,x)=>s+instRem(x),0);
+  const irow = it => {
+    const done = it.paid>=it.months;
+    const paidThis = it.lastPaid===curM;
+    const overdue = !done && !paidThis && new Date().getDate() > it.day;
+    const stat = done ? "Đã trả xong 🎉"
+      : paidThis ? "Đã trả tháng này ✓ · còn "+fmt(instRem(it))
+      : (overdue?"Quá hạn — ":"Đến ")+"hạn ngày "+it.day+" hàng tháng · còn "+fmt(instRem(it));
+    return `<div class="tx ${done?'done':''}">
+      <span class="ico">📅</span>
+      <div class="grow"><div class="n">${esc(it.name)} <span class="tiny">(${it.paid}/${it.months} tháng)</span></div>
+      <div class="s ${overdue?'neg':''}">${stat}</div></div>
+      <span class="a">${fmt(done?it.monthly:instCur(it))}<span class="tiny">/th</span></span>
+      ${done||paidThis?"":`<button class="paybtn" onclick="payInst('${it.id}')">✓</button>`}
+      ${done?"":`<button class="edt" onclick="editInst('${it.id}')" aria-label="Sửa">✎</button>`}
+      <button class="del" onclick="delInst('${it.id}')" aria-label="Xóa">✕</button>
+    </div>`;
+  };
   return `
     <div class="card">
       <div class="ptabs" style="margin-bottom:12px">
         <button class="${debtDir==='owe'?'on':''}" onclick="debtDir='owe';keepDform();render()">🔖 Mình nợ</button>
         <button class="${debtDir==='lend'?'on':''}" onclick="debtDir='lend';keepDform();render()">🤝 Cho vay</button>
+        <button class="${debtDir==='inst'?'on':''}" onclick="debtDir='inst';render()">📅 Trả góp</button>
       </div>
-      ${(()=>{ const ed = dEdit ? S.debts.find(x=>x.id===dEdit) : null; return `
+      ${debtDir==="inst" ? (()=>{ const ed = iEdit ? insts.find(x=>x.id===iEdit) : null; return `
       ${ed?`<div class="tiny mb" style="color:var(--blue)">✎ Đang sửa "${esc(ed.name)}"</div>`:""}
-      <input type="text" id="dname" placeholder="${debtDir==='lend'?'Ai nợ mình / khoản gì (vd: Nam mượn)':'Nợ ai / khoản gì (vd: trả góp điện thoại)'}" class="mb" value="${ed?esc(ed.name):''}">
+      <input type="text" id="iname" placeholder="Tên khoản trả góp (vd: trả góp xe máy)" class="mb" value="${ed?esc(ed.name):''}">
+      <input type="tel" id="itotal" inputmode="numeric" placeholder="Tổng số tiền nợ (VNĐ)" class="mb" oninput="instCalc('total')" value="${ed?fmtIn(ed.total):''}">
+      <div class="row mb">
+        <div class="grow"><div class="tiny" style="margin-bottom:4px">Số tháng trả</div>
+        <input type="number" id="imonths" min="1" max="240" placeholder="12" oninput="instCalc('months')" value="${ed?ed.months:''}"></div>
+        <div class="grow"><div class="tiny" style="margin-bottom:4px">Tiền trả mỗi tháng</div>
+        <input type="tel" id="imon" inputmode="numeric" placeholder="tự tính" oninput="instCalc('mon')" value="${ed?fmtIn(ed.monthly):''}"></div>
+      </div>
+      <p class="tiny mb">Nhập <b>Tổng nợ + Số tháng</b> (tiền/tháng tự tính) hoặc <b>Tiền/tháng + Số tháng</b> (tổng tự tính).</p>
+      <div class="tiny" style="margin-bottom:4px">Ngày đến hạn hàng tháng (1–28)</div>
+      <input type="number" id="iday" min="1" max="28" class="mb" value="${ed?ed.day:5}">
+      <div class="row">
+        <button class="btn grow" onclick="addInst()">${ed?'Cập nhật':'Thêm khoản trả góp'}</button>
+        ${ed?`<button class="pill" style="padding:13px 16px" onclick="iEdit=null;render()">Hủy</button>`:""}
+      </div>`;})() : (()=>{ const ed = dEdit ? S.debts.find(x=>x.id===dEdit) : null; return `
+      ${ed?`<div class="tiny mb" style="color:var(--blue)">✎ Đang sửa "${esc(ed.name)}"</div>`:""}
+      <input type="text" id="dname" placeholder="${debtDir==='lend'?'Ai nợ mình / khoản gì (vd: Nam mượn)':'Nợ ai / khoản gì (vd: mượn nóng bạn bè)'}" class="mb" value="${ed?esc(ed.name):''}">
       <input type="tel" id="damt" inputmode="numeric" placeholder="Số tiền (VNĐ)" class="mb" value="${ed?fmtIn(ed.amount):''}">
       <div class="tiny" style="margin-bottom:4px">${debtDir==='lend'?'Hạn thu hồi':'Hạn trả'} (không bắt buộc)</div>
       <input type="date" id="ddue" class="mb" value="${ed&&ed.due?ed.due:''}">
@@ -694,11 +736,61 @@ function soDebt(){
         ${ed?`<button class="pill" style="padding:13px 16px" onclick="dEdit=null;render()">Hủy</button>`:""}
       </div>`;})()}
     </div>
+    ${activeI.length ? `<h2>Nợ trả góp — <span class="neg">${fmt(monTot)}/tháng</span></h2>
+    <p class="tiny" style="margin:-4px 0 10px">Tổng còn phải trả: <b>${fmt(remTot)}</b> · ${activeI.length} khoản, xếp theo ngày đến hạn</p>
+    ${activeI.map(irow).join("")}` : (debtDir==="inst" ? `<h2>Nợ trả góp</h2><p class="tiny">Chưa có khoản trả góp nào.</p>` : "")}
     <h2>Nợ phải trả${oweTot?` — <span class="neg">${fmt(oweTot)}</span>`:""}</h2>
     ${owe.length ? owe.map(row).join("") : `<p class="tiny">Không có khoản nợ nào. Tuyệt!</p>`}
     <h2>Nợ chưa thu hồi${lendTot?` — <span class="pos">${fmt(lendTot)}</span>`:""}</h2>
     ${lend.length ? lend.map(row).join("") : `<p class="tiny">Không ai nợ bạn cả.</p>`}
-    ${paid.length ? `<h2>Đã xong</h2>`+paid.map(row).join("") : ""}`;
+    ${(paid.length||doneI.length) ? `<h2>Đã xong</h2>`+paid.map(row).join("")+doneI.map(irow).join("") : ""}`;
+}
+/* nợ trả góp (có kỳ hạn) */
+function instRem(it){ return Math.max(0, it.total - it.paid*it.monthly); }
+function instCur(it){ return Math.min(it.monthly, instRem(it)); }
+function instCalc(src){
+  const t=document.getElementById("itotal"), m=document.getElementById("imonths"), p=document.getElementById("imon");
+  if(!t||!m||!p) return;
+  const tv=Number(t.value.replace(/\D/g,"")), mv=Number(m.value)||0, pv=Number(p.value.replace(/\D/g,""));
+  if(src==="mon"){ if(pv && mv) t.value = fmtIn(pv*mv); }
+  else if(tv && mv) p.value = fmtIn(Math.ceil(tv/mv/1000)*1000);
+}
+function addInst(){
+  const name = document.getElementById("iname").value.trim();
+  let total = Number(document.getElementById("itotal").value.replace(/\D/g,""));
+  const months = Math.max(0, Math.min(240, Number(document.getElementById("imonths").value)||0));
+  let monthly = Number(document.getElementById("imon").value.replace(/\D/g,""));
+  const day = Math.min(28, Math.max(1, Number(document.getElementById("iday").value)||5));
+  if(!name){ toast("Nhập tên khoản trả góp"); return; }
+  if(!months){ toast("Nhập số tháng trả"); return; }
+  if(!total && monthly) total = monthly*months;
+  if(total && !monthly) monthly = Math.ceil(total/months/1000)*1000;
+  if(!total || !monthly){ toast("Nhập tổng nợ hoặc tiền trả mỗi tháng"); return; }
+  if(iEdit){
+    const it = S.installs.find(x=>x.id===iEdit);
+    if(it){ it.name=name; it.total=total; it.monthly=monthly; it.months=months; it.day=day;
+      if(it.paid>months) it.paid=months; }
+    iEdit = null; save(); render(); toast("Đã cập nhật ✓"); return;
+  }
+  S.installs.push({id:"i"+Date.now(), name, total, monthly, months, day, paid:0, lastPaid:null});
+  save(); render(); toast("Đã thêm khoản trả góp ✓");
+}
+function payInst(id){
+  const it = S.installs.find(x=>x.id===id); if(!it) return;
+  const cur = instCur(it);
+  if(!confirm("Đánh dấu đã trả kỳ này cho \""+it.name+"\" ("+fmt(cur)+")?\nLưu ý: không tự ghi vào sổ giao dịch — nếu cần, hãy thêm giao dịch chi riêng.")) return;
+  it.paid++; it.lastPaid = todayStr().slice(0,7);
+  save(); render();
+  toast(it.paid>=it.months ? "🎉 Đã trả xong "+it.name+"!" : "Đã trả kỳ "+it.paid+"/"+it.months+" ✓");
+}
+function editInst(id){
+  if(!S.installs.some(x=>x.id===id)) return;
+  iEdit = id; debtDir = "inst"; render();
+  const el = document.getElementById("iname"); if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
+}
+function delInst(id){
+  if(!confirm("Xóa khoản trả góp này?")) return;
+  S.installs = S.installs.filter(x=>x.id!==id); save(); render(); toast("Đã xóa");
 }
 function keepDform(){
   const n=document.getElementById("dname"), a=document.getElementById("damt"), u=document.getElementById("ddue");

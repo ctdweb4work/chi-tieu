@@ -1,4 +1,4 @@
-const CACHE = "chitieu-v12";
+const CACHE = "chitieu-v13";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", e => {
